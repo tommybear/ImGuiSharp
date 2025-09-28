@@ -79,12 +79,55 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
 
 ## Differences vs. Dear ImGui (today)
 
-- Partial widget set (Button, Text/Label). Checkbox/Slider and text input are
-  planned next.
+- Early widget set (Button, Text/Label, Checkbox, SliderFloat). Text input and
+  more complex widgets are planned next.
+
+## Widget interaction notes
+
+- Checkbox
+  - ID derived from label (and ID stack when pushed) guards hover/active state.
+  - Click press on the box activates; release over the box toggles the value.
+  - Visuals: filled box with inner mark when checked; label drawn to the right.
+
+- SliderFloat
+  - Press within the track activates; horizontal mouse drag maps pixels→value
+    with clamping to `[min,max]` and returns `true` on release.
+  - Visuals: track + knob; label and formatted value are drawn near the slider.
 - No docking/tables/menus yet.
 - Fonts: ASCII subset baked by default; kerning and wider ranges will be added.
 - Window identity is name‑based; this will evolve to include the ID stack to
   avoid collisions.
+
+## How To Add A New Widget
+
+- ID and registration
+  - Derive a stable ID from the label and current ID stack: `var id = context.GetId(label);`
+  - Compute the item rect at `CursorPos` and call `context.RegisterItem(id, rect);` if applicable.
+
+- Hit‑testing and state
+  - `hovered = context.IsMouseHoveringRect(min, max);` → `context.SetHoveredId(id)` when hovered.
+  - On press over the item: `context.SetActiveId(id)`; on release, commit the action if still hovered, then `context.ClearActiveId()`.
+  - Return `true` when the widget’s bound value changes (or when committing a drag, like `SliderFloat`).
+
+- Drawing
+  - Use `context.AddRectFilled`/`ImGui.FillRect` for solid geometry. Solid fills assume `TextureId == 0` (renderer binds the 1×1 white texture).
+  - Use `context.AddText(baseline, text, color)` for labels/values; baseline Y is `pos.Y + context.GetAscent()`.
+  - Respect the current clip rect; the builder clips per draw command automatically.
+
+- Layout
+  - Advance vertical layout via `context.AdvanceCursor(new Vec2(0, height))` (height typically line height or control height + spacing).
+  - For multi‑line controls, advance by the drawn height plus a small gap.
+
+- ID stack and duplicates
+  - Support duplicate labels by relying on `PushID/PopID` around repeated items in caller code.
+  - Avoid hidden “##suffix” parsing for now; prefer explicit `PushID` scopes.
+
+- Testing checklist
+  - Hover/press/release transitions set `HoveredId`/`ActiveId` as expected and toggle/commit the value.
+  - ID stability with `PushID` in repeated rows (e.g., inside a child/scrolling region).
+  - Cursor advancement equals control height; no overlap between consecutive items.
+  - Draw‑list invariants: solid fills emit `TextureId == 0`; text quads use the atlas texture and current clip rect.
+  - For sliders/drags: pixel→value mapping is clamped and monotonic; returns `true` on commit.
 
 ## Extensibility
 
@@ -99,4 +142,3 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   and text measurement baselines.
 - Rendering contract: verify draw‑command sequences (clip/texture ids) and a
   non‑blank off‑screen sanity render.
-

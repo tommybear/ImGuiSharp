@@ -20,6 +20,8 @@
 - [ ] Implement baseline widgets (text, button, checkbox, slider, combo, separator).
   - [x] Add button widget with ID stack handling and hover/press tests.
   - [x] Text + Label helpers using embedded font atlas.
+  - [x] Checkbox (bool toggle with label) with unit tests.
+  - [x] SliderFloat (drag to set value) with unit tests.
 - [ ] Add style configuration and per-widget styling overrides.
 - [ ] Integrate font atlas generator and glyph rasterization pipeline.
   - [x] Embed Proggy Clean TTF; bake ASCII atlas via StbTrueTypeSharp.

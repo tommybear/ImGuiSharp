@@ -14,7 +14,7 @@ purely for comparison while we build feature parity.
 - Draw data: immutable draw lists + commands with per‑command `TextureId`
 - Fonts & text: embedded Proggy Clean TTF (Tristan Grimmer), baked at runtime
   with StbTrueTypeSharp into an RGBA atlas; `ImGui.Text`, `ImGui.Label`
-- Widgets & layout: `ImGui.Button`, `ImGui.Text`, `ImGui.Label`,
+- Widgets & layout: `ImGui.Button`, `ImGui.Text`, `ImGui.Label`, `ImGui.Checkbox`, `ImGui.SliderFloat`,
   `ImGui.Begin/End`, `ImGui.BeginChild/EndChild` (padding + clipping),
   mouse‑wheel scrolling with persisted per‑window offset
 - Scrollbars: simple vertical thumb sized by visible/content, draggable
@@ -22,6 +22,7 @@ purely for comparison while we build feature parity.
   texture binding + default 1×1 white fallback, scissor‑aware clear fix
 
 See TODO.md and MILESTONE.md for roadmap and status.
+For architecture details and contributor guidance (including how to add a new widget), see ARCHITECTURE.md.
 
 ## Getting started
 
@@ -92,4 +93,3 @@ ImGuiSharp is a clean‑room re‑implementation inspired by Dear ImGui’s desi
 Upstream sources under `reference/` are provided for comparison only.
 
 Please see repository license and third‑party notices for included assets.
-

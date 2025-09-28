@@ -41,3 +41,5 @@
 - 2024-05-17: Introduced draw-list builder with clip rect stack; PushClipRect/PopClipRect/FillRect.
 - 2024-05-17: Implemented Begin/End and BeginChild/EndChild with clip + padding and wheel scrolling; persisted per-window ScrollY.
 - 2024-05-17: Added simple vertical scrollbar with draggable thumb; fixed scissor-aware clear and solid-fill texture binding.
+- 2024-05-17: Implemented Checkbox and SliderFloat; integrated into scrolling child; added unit tests for toggle/ID stability and slider drag mapping.
+- 2025-09-28: Added ARCHITECTURE.md section "How To Add A New Widget" with guidance on IDs, hit-testing, drawing, layout, and tests; linked from README.

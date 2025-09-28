@@ -33,6 +33,8 @@ var toggle = false;
 var mousePosition = new Vec2(-100f, -100f);
 var mouseScroll = new Vec2(0f, 0f);
 float scrollY = 0f;
+bool[] demoChecks = Enumerable.Repeat(false, 32).ToArray();
+float[] demoValues = Enumerable.Repeat(0.5f, 32).ToArray();
 
 static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
@@ -125,11 +127,13 @@ window.Update += deltaTime =>
     ImGui.SetCursorPos(regionPos);
     ImGui.BeginChild("scrolling-list", regionSize, new Vec2(8f, 8f));
     {
-        const int itemCount = 30;
-        var lineH = context.GetLineHeight() + 4f;
+        const int itemCount = 20;
         for (int i = 0; i < itemCount; i++)
         {
-            ImGui.Text($"Item {i}");
+            ImGui.PushID(i);
+            ImGui.Checkbox($"Item {i}", ref demoChecks[i]);
+            ImGui.SliderFloat($"Value {i}", ref demoValues[i], 0f, 1f, new ImGuiSharp.Math.Vec2(180f, 18f));
+            ImGui.PopID();
         }
     }
     ImGui.EndChild();

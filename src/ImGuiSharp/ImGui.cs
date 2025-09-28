@@ -270,6 +270,134 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Checkbox with a text label. Returns true if the value changed.
+    /// </summary>
+    public static bool Checkbox(string label, ref bool value)
+    {
+        var context = GetCurrentContext();
+        var id = context.GetId(label);
+        var cursor = context.CursorPos;
+        var lineH = context.GetLineHeight();
+        float boxSize = MathF.Min(16f, lineH);
+        var rect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + boxSize, cursor.Y + boxSize);
+        context.RegisterItem(id, rect);
+
+        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        if (hovered)
+        {
+            context.SetHoveredId(id);
+        }
+
+        bool changed = false;
+        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
+        {
+            context.SetActiveId(id);
+        }
+        if (context.ActiveId == id)
+        {
+            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
+            {
+                if (hovered)
+                {
+                    value = !value;
+                    changed = true;
+                }
+                context.ClearActiveId();
+            }
+        }
+
+        // Draw box
+        var normal = new ImGuiSharp.Math.Color(0.20f, 0.22f, 0.27f, 1f);
+        var hoveredCol = new ImGuiSharp.Math.Color(0.28f, 0.30f, 0.36f, 1f);
+        var activeCol = new ImGuiSharp.Math.Color(0.33f, 0.36f, 0.43f, 1f);
+        var col = (context.ActiveId == id) ? activeCol : (hovered ? hoveredCol : normal);
+        FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(boxSize, boxSize), col);
+        if (value)
+        {
+            // simple check: inner smaller filled rect
+            FillRect(new Vec2(rect.MinX + 3, rect.MinY + 3), new Vec2(boxSize - 6, boxSize - 6), new ImGuiSharp.Math.Color(0.9f, 0.9f, 0.95f, 1f));
+        }
+
+        // Draw label to the right
+        if (!string.IsNullOrEmpty(label))
+        {
+            var baseline = new Vec2(rect.MaxX + 8f, rect.MinY + context.GetAscent());
+            context.AddText(baseline, label, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        }
+
+        context.AdvanceCursor(new Vec2(0f, lineH));
+        return changed;
+    }
+
+    /// <summary>
+    /// Slider for a float value. Returns true if the value changed.
+    /// </summary>
+    public static bool SliderFloat(string label, ref float value, float min, float max, Vec2? size = null, string? format = null)
+    {
+        var context = GetCurrentContext();
+        var id = context.GetId(label);
+        var cursor = context.CursorPos;
+        var lineH = context.GetLineHeight();
+        var sz = size ?? new Vec2(200f, MathF.Max(18f, lineH));
+        var rect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + sz.X, cursor.Y + sz.Y);
+        context.RegisterItem(id, rect);
+
+        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        if (hovered) context.SetHoveredId(id);
+
+        // Begin drag
+        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
+        {
+            context.SetActiveId(id);
+        }
+
+        // While dragging, map mouse X to value
+        if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
+        {
+            var mx = GetCurrentContext().IO.MousePosition.X;
+            var left = rect.MinX + 6f; // padding
+            var right = rect.MaxX - 6f;
+            var t = (mx - left) / MathF.Max(1f, (right - left));
+            t = Clamp01(t);
+            var newVal = min + t * (max - min);
+            newVal = (newVal < min) ? min : (newVal > max ? max : newVal);
+            if (newVal != value)
+            {
+                value = newVal;
+            }
+        }
+
+        bool released = context.ActiveId == id && context.IsMouseJustReleased(ImGuiMouseButton.Left);
+        if (released)
+        {
+            context.ClearActiveId();
+        }
+
+        // Draw track and knob
+        var trackCol = new ImGuiSharp.Math.Color(0.20f, 0.22f, 0.27f, 1f);
+        var fillCol = new ImGuiSharp.Math.Color(0.33f, 0.36f, 0.43f, 1f);
+        FillRect(new Vec2(rect.MinX, rect.MinY + (sz.Y - 8f) * 0.5f), new Vec2(sz.X, 8f), trackCol);
+        var tknob = (value - min) / MathF.Max(0.0001f, (max - min));
+        var knobX = rect.MinX + 6f + tknob * MathF.Max(1f, (sz.X - 12f));
+        FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), fillCol);
+
+        // Label & value text
+        if (!string.IsNullOrEmpty(label))
+        {
+            var valText = (format == null) ? value.ToString("0.00") : string.Format(format, value);
+            var text = string.Concat(label, ": ", valText);
+            var baseline = new Vec2(rect.MinX, rect.MinY - context.GetAscent() + sz.Y + context.GetAscent());
+            // draw below slider
+            context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        }
+
+        context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
+        return released; // true when user released (committed) the drag
+    }
+
+    private static float Clamp01(float v) => (v < 0f) ? 0f : (v > 1f ? 1f : v);
+
+    /// <summary>
     /// Sets a clip rectangle for subsequent draw calls. Use PopClipRect to restore.
     /// </summary>
     public static void PushClipRect(Vec2 min, Vec2 max)
