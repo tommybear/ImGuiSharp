@@ -7,6 +7,7 @@
 
 ## Core Library (ImGuiSharp)
 - [x] Seed `ImGuiContext` lifecycle, input queue, and static `ImGui` facade with tests.
+- [x] Extend `ImGuiContext` with time accumulation and input state (mouse, key) snapshots.
 - [ ] Define public API surface mirroring Dear ImGui entry points (`ImGui`, `ImDrawList`, etc.).
 - [ ] Implement context and IO management (`ImGuiContext`, input queues, frame timing).
 - [ ] Port essential math primitives (`Vec2`, `Vec4`, `Color`, `Rect`, matrix helpers).

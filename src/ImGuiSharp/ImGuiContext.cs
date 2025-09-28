@@ -10,6 +10,11 @@ namespace ImGuiSharp;
 public sealed class ImGuiContext
 {
     private readonly List<IImGuiInputEvent> _inputEvents = new();
+    private readonly bool[] _mouseButtons = new bool[3];
+    private readonly Dictionary<ImGuiKey, bool> _keyStates = new();
+    private float _time;
+    private float _mousePosX;
+    private float _mousePosY;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -63,6 +68,84 @@ public sealed class ImGuiContext
         IsFrameStarted = false;
         FrameCount++;
     }
+
+    /// <summary>
+    /// Updates the delta time and accumulates total elapsed time.
+    /// </summary>
+    /// <param name="deltaSeconds">Elapsed time since the previous frame in seconds.</param>
+    public void UpdateDeltaTime(float deltaSeconds)
+    {
+        if (deltaSeconds < 0f)
+        {
+            throw new ArgumentOutOfRangeException(nameof(deltaSeconds), "Delta time must be non-negative.");
+        }
+
+        IO.DeltaTime = deltaSeconds;
+        _time += deltaSeconds;
+        IO.Time = _time;
+    }
+
+    /// <summary>
+    /// Gets the accumulated time since the context was created.
+    /// </summary>
+    public float GetTime() => _time;
+
+    /// <summary>
+    /// Updates the tracked mouse position.
+    /// </summary>
+    /// <param name="x">The X coordinate in pixels.</param>
+    /// <param name="y">The Y coordinate in pixels.</param>
+    public void SetMousePosition(float x, float y)
+    {
+        _mousePosX = x;
+        _mousePosY = y;
+        IO.MousePositionX = x;
+        IO.MousePositionY = y;
+    }
+
+    /// <summary>
+    /// Updates the pressed state for a specific mouse button.
+    /// </summary>
+    /// <param name="button">The button to update.</param>
+    /// <param name="isPressed">True when pressed, false when released.</param>
+    public void SetMouseButtonState(ImGuiMouseButton button, bool isPressed)
+    {
+        var index = (int)button;
+        if ((uint)index >= _mouseButtons.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(button));
+        }
+
+        _mouseButtons[index] = isPressed;
+        IO.SetMouseButton(button, isPressed);
+    }
+
+    /// <summary>
+    /// Returns a snapshot of the current mouse position and button states.
+    /// </summary>
+    public ImGuiMouseStateSnapshot GetMouseState() => new(_mousePosX, _mousePosY, _mouseButtons);
+
+    /// <summary>
+    /// Updates the pressed state for the provided key.
+    /// </summary>
+    /// <param name="key">The logical key.</param>
+    /// <param name="isPressed">True when pressed, false when released.</param>
+    public void SetKeyState(ImGuiKey key, bool isPressed)
+    {
+        if (isPressed)
+        {
+            _keyStates[key] = true;
+        }
+        else
+        {
+            _keyStates.Remove(key);
+        }
+    }
+
+    /// <summary>
+    /// Returns a snapshot of the logical key state map.
+    /// </summary>
+    public ImGuiKeyStateSnapshot GetKeyState() => new(_keyStates);
 
     /// <summary>
     /// Enqueues an input event to be processed by the next frame.

@@ -30,3 +30,4 @@
 - 2024-05-17: Scaffolded ImGuiSharp solution with core library, Silk.NET renderer stub, sample app, and xUnit test project.
 - 2024-05-17: Replaced template stubs with `ImGuiContext`/`ImGuiIO`, defined rendering abstractions, added Silk.NET package reference, and seeded frame lifecycle tests.
 - 2024-05-17: Extended context with input queues and exposed ImGui static facade backed by unit tests.
+- 2024-05-17: Added timing, mouse, and key state tracking to context and wired facade helpers to expose them.
