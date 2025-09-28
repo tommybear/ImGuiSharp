@@ -292,4 +292,37 @@ public static class ImGui
         context.AddRectFilled(rect, color);
     }
 
+    /// <summary>
+    /// Begins a window at an absolute position and size. Call End() to close.
+    /// </summary>
+    public static void Begin(string name, Vec2 pos, Vec2 size, Vec2? padding = null)
+    {
+        GetCurrentContext().BeginWindow(name, pos, size, padding ?? new Vec2(8f, 8f), isChild: false);
+    }
+
+    /// <summary>
+    /// Ends the current window.
+    /// </summary>
+    public static void End()
+    {
+        GetCurrentContext().EndWindow();
+    }
+
+    /// <summary>
+    /// Begins a child region at the current cursor with the given size. Call EndChild() to close.
+    /// </summary>
+    public static void BeginChild(string id, Vec2 size, Vec2? padding = null)
+    {
+        var ctx = GetCurrentContext();
+        ctx.BeginWindow(id, ctx.CursorPos, size, padding ?? new Vec2(8f, 8f), isChild: true);
+    }
+
+    /// <summary>
+    /// Ends the current child region.
+    /// </summary>
+    public static void EndChild()
+    {
+        GetCurrentContext().EndWindow();
+    }
+
 }

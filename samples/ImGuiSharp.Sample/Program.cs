@@ -118,40 +118,21 @@ window.Update += deltaTime =>
     ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 180f));
 
     // Scrollable region demo
+    // Scrollable region using BeginChild/EndChild
     var regionPos = new Vec2(260f, 110f);
     var regionSize = new Vec2(280f, 160f);
-    var regionMin = regionPos;
-    var regionMax = new Vec2(regionPos.X + regionSize.X, regionPos.Y + regionSize.Y);
     ImGui.FillRect(regionPos, regionSize, new ImGuiSharp.Math.Color(0.12f, 0.14f, 0.18f, 1f));
-    ImGui.PushClipRect(regionMin, regionMax);
-
-    // Simple list content
-    const int itemCount = 30;
-    var lineH = context.GetLineHeight() + 4f;
-    var contentH = itemCount * lineH + 8f;
-    // static scroll offset
-    scrollY = Clamp(scrollY, 0f, MathF.Max(0f, contentH - regionSize.Y));
-    // If hovering region, apply wheel
-    var hovering = mousePosition.X >= regionMin.X && mousePosition.X <= regionMax.X &&
-                   mousePosition.Y >= regionMin.Y && mousePosition.Y <= regionMax.Y;
-    if (hovering)
+    ImGui.SetCursorPos(regionPos);
+    ImGui.BeginChild("scrolling-list", regionSize, new Vec2(8f, 8f));
     {
-        var dy = ImGui.GetIO().MouseWheel;
-        if (MathF.Abs(dy) > 0f)
+        const int itemCount = 30;
+        var lineH = context.GetLineHeight() + 4f;
+        for (int i = 0; i < itemCount; i++)
         {
-            scrollY = Clamp(scrollY - dy * 40f, 0f, MathF.Max(0f, contentH - regionSize.Y));
+            ImGui.Text($"Item {i}");
         }
     }
-
-    // Draw items with vertical offset
-    var y = regionPos.Y + 8f - scrollY;
-    for (int i = 0; i < itemCount; i++)
-    {
-        ImGui.Label($"Item {i}", new Vec2(regionPos.X + 8f, y));
-        y += lineH;
-    }
-
-    ImGui.PopClipRect();
+    ImGui.EndChild();
 
     context.EndFrame();
 };

@@ -28,6 +28,8 @@ public sealed class ImGuiContext
     private float _pendingMouseWheelY;
     private FontAtlas? _fontAtlas;
     private IntPtr _fontTexture;
+    private readonly Stack<WindowState> _windowStack = new();
+    private readonly System.Collections.Generic.Dictionary<string, float> _windowScrollY = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -428,4 +430,86 @@ public sealed class ImGuiContext
     public float GetLineHeight() => _fontAtlas?.LineHeight ?? 16f;
 
     public float GetAscent() => _fontAtlas?.Ascent ?? 12f;
+
+    private sealed class WindowState
+    {
+        public string Name = string.Empty;
+        public Vec2 Pos;
+        public Vec2 Size;
+        public Vec2 Padding;
+        public float ScrollY;
+        public Vec2 PrevCursorPos;
+        public float ContentStartY;
+        public bool IsChild;
+    }
+
+    internal void BeginWindow(string name, in Vec2 pos, in Vec2 size, in Vec2 padding, bool isChild)
+    {
+        var ws = new WindowState
+        {
+            Name = name,
+            Pos = pos,
+            Size = size,
+            Padding = padding,
+            IsChild = isChild,
+            PrevCursorPos = _cursorPos,
+        };
+
+        // Restore persistent scroll
+        if (_windowScrollY.TryGetValue(name, out var persistedScroll))
+        {
+            ws.ScrollY = persistedScroll;
+        }
+
+        // Apply mouse wheel to scroll if hovered
+        var rect = new ImGuiRect(pos.X, pos.Y, pos.X + size.X, pos.Y + size.Y);
+        var hovered = IsMouseHoveringRect(pos, new Vec2(pos.X + size.X, pos.Y + size.Y));
+        if (hovered)
+        {
+            var dy = IO.MouseWheel;
+            if (MathF.Abs(dy) > 0f)
+            {
+                ws.ScrollY = MathF.Max(0f, ws.ScrollY - dy * 40f);
+            }
+        }
+
+        // Set cursor to content origin (account for padding and scroll)
+        _cursorPos = new Vec2(pos.X + padding.X, pos.Y + padding.Y - ws.ScrollY);
+        ws.ContentStartY = _cursorPos.Y;
+
+        // Clip to window rect
+        PushClipRect(rect);
+        _windowStack.Push(ws);
+    }
+
+    internal void EndWindow()
+    {
+        if (_windowStack.Count == 0)
+        {
+            throw new InvalidOperationException("End/EndChild called with no matching Begin.");
+        }
+
+        var ws = _windowStack.Pop();
+        // Compute content height and clamp scroll to content height
+        var innerH = ws.Size.Y - (ws.Padding.Y * 2f);
+        var contentH = (_cursorPos.Y - ws.ContentStartY) + ws.Padding.Y;
+        if (contentH > 0 && innerH > 0)
+        {
+            var maxScroll = MathF.Max(0f, contentH - innerH);
+            ws.ScrollY = Clamp(ws.ScrollY, 0f, maxScroll);
+        }
+        _cursorPos = ws.PrevCursorPos;
+        PopClipRect();
+
+        // Persist scroll for this window name
+        _windowScrollY[ws.Name] = ws.ScrollY;
+
+        // Advance cursor by window size if it was a child positioned at current cursor
+        if (ws.IsChild)
+        {
+            AdvanceCursor(new Vec2(0f, ws.Size.Y + DefaultItemSpacingY));
+        }
+    }
+
+    private static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
 }
