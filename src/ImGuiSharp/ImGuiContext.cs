@@ -30,6 +30,7 @@ public sealed class ImGuiContext
     private IntPtr _fontTexture;
     private readonly Stack<WindowState> _windowStack = new();
     private readonly System.Collections.Generic.Dictionary<string, float> _windowScrollY = new();
+    private readonly System.Collections.Generic.Dictionary<string, ScrollbarState> _windowScrollbar = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -498,6 +499,58 @@ public sealed class ImGuiContext
             var maxScroll = MathF.Max(0f, contentH - innerH);
             ws.ScrollY = Clamp(ws.ScrollY, 0f, maxScroll);
         }
+
+        // Draw and handle vertical scrollbar if needed
+        if (contentH > innerH + 0.5f)
+        {
+            float barW = 10f;
+            float trackX = ws.Pos.X + ws.Size.X - barW;
+            float trackTop = ws.Pos.Y + ws.Padding.Y;
+            float trackBottom = ws.Pos.Y + ws.Size.Y - ws.Padding.Y;
+            float trackH = MathF.Max(1f, trackBottom - trackTop);
+            float scrollRange = MathF.Max(1f, contentH - innerH);
+            float thumbH = MathF.Max(20f, (innerH * trackH) / contentH);
+            float thumbTravel = MathF.Max(1f, trackH - thumbH);
+            float thumbTop = trackTop + (ws.ScrollY / scrollRange) * thumbTravel;
+            float thumbBottom = thumbTop + thumbH;
+
+            // Track
+            AddRectFilled(new ImGuiRect(trackX, trackTop, trackX + barW, trackBottom), new Color(0.2f, 0.2f, 0.25f, 0.6f));
+
+            // Interaction
+            var mp = _mousePosition;
+            bool thumbHovered = mp.X >= trackX && mp.X <= trackX + barW && mp.Y >= thumbTop && mp.Y <= thumbBottom;
+            var id = GetId(ws.Name + "##scrollbar");
+            if (thumbHovered && IsMouseJustPressed(ImGuiMouseButton.Left))
+            {
+                SetActiveId(id);
+                _windowScrollbar[ws.Name] = new ScrollbarState { Dragging = true, StartMouseY = mp.Y, StartScrollY = ws.ScrollY, Id = id };
+            }
+
+            if (IsMouseDown(ImGuiMouseButton.Left) && ActiveId == id && _windowScrollbar.TryGetValue(ws.Name, out var drag))
+            {
+                float delta = mp.Y - drag.StartMouseY;
+                float newScroll = drag.StartScrollY + (delta * (scrollRange / thumbTravel));
+                ws.ScrollY = Clamp(newScroll, 0f, scrollRange);
+                // Recompute thumb after scroll
+                thumbTop = trackTop + (ws.ScrollY / scrollRange) * thumbTravel;
+                thumbBottom = thumbTop + thumbH;
+            }
+
+            if (IsMouseJustReleased(ImGuiMouseButton.Left) && ActiveId == id)
+            {
+                ClearActiveId();
+                if (_windowScrollbar.TryGetValue(ws.Name, out var s))
+                {
+                    s.Dragging = false;
+                    _windowScrollbar[ws.Name] = s;
+                }
+            }
+
+            var thumbColor = (thumbHovered || ActiveId == id) ? new Color(0.85f, 0.85f, 0.90f, 0.95f) : new Color(0.75f, 0.75f, 0.80f, 0.85f);
+            AddRectFilled(new ImGuiRect(trackX + 1f, thumbTop, trackX + barW - 1f, thumbBottom), thumbColor);
+        }
+
         _cursorPos = ws.PrevCursorPos;
         PopClipRect();
 
@@ -512,4 +565,12 @@ public sealed class ImGuiContext
     }
 
     private static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
+
+    private struct ScrollbarState
+    {
+        public bool Dragging;
+        public float StartMouseY;
+        public float StartScrollY;
+        public uint Id;
+    }
 }
