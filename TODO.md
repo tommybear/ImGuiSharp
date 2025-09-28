@@ -23,6 +23,7 @@
 ## Rendering Backend
 - [x] Define `IRendererBackend` abstraction (buffers, textures, shader hooks).
 - [ ] Implement simple OpenGL backend using Silk.NET or OpenTK.
+  - [x] Allocate core GL resources (VAO/VBO/EBO, shaders) and stub buffer uploads in Silk.NET pipeline.
 - [ ] Add resource lifetime management (textures, buffers, shaders) and batching.
 - [ ] Provide fallback software rasterizer for headless tests (optional).
 
