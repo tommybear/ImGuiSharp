@@ -94,8 +94,11 @@ window.Update += deltaTime =>
 
     context.NewFrame();
 
+    ImGui.SetCursorPos(new Vec2(40f, 30f));
+    ImGui.SeparatorText("Primary Controls");
+
     // Primary button: no toggle side-effect; use a stable ID to avoid collisions
-    ImGui.SetCursorPos(new Vec2(40f, 40f));
+    ImGui.SetCursorPos(new Vec2(40f, 70f));
     ImGui.PushID("primary");
     var primaryPressed = ImGui.Button("Primary", new Vec2(200f, 50f));
     ImGui.PopID();
@@ -107,7 +110,7 @@ window.Update += deltaTime =>
     }
 
     // Toggle button: clicking this flips the state; also give it a stable ID
-    ImGui.SetCursorPos(new Vec2(40f, 110f));
+    ImGui.SetCursorPos(new Vec2(40f, 130f));
     ImGui.PushID("toggle");
     var togglePressed = ImGui.Button(toggle ? "Toggle On" : "Toggle Off", new Vec2(200f, 45f));
     ImGui.PopID();
@@ -116,17 +119,24 @@ window.Update += deltaTime =>
         toggle = !toggle;
     }
 
+    ImGui.SetCursorPos(new Vec2(40f, 190f));
+    ImGui.Separator();
+
     // Demonstrate Label helper (absolute position, not affecting cursor)
-    ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 180f));
+    ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 210f));
 
     // Scrollable region demo
     // Scrollable region using BeginChild/EndChild
+    ImGui.SetCursorPos(new Vec2(260f, 80f));
+    ImGui.SeparatorText("Scrollable Items");
     var regionPos = new Vec2(260f, 110f);
     var regionSize = new Vec2(280f, 160f);
     ImGui.FillRect(regionPos, regionSize, new ImGuiSharp.Math.Color(0.12f, 0.14f, 0.18f, 1f));
     ImGui.SetCursorPos(regionPos);
     ImGui.BeginChild("scrolling-list", regionSize, new Vec2(8f, 8f));
     {
+        ImGui.SeparatorText("Items");
+        ImGui.Spacing();
         const int itemCount = 20;
         for (int i = 0; i < itemCount; i++)
         {

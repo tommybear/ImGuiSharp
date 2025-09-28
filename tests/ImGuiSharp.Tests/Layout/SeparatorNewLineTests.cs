@@ -65,4 +65,51 @@ public sealed class SeparatorNewLineTests
 
         ImGui.SetCurrentContext(null);
     }
+
+    [Fact]
+    public void SeparatorText_DrawsLabelWithLines()
+    {
+        var ctx = new ImGuiContext();
+        ImGui.SetCurrentContext(ctx);
+        ImGui.SetDisplaySize(new Vec2(400, 300));
+
+        ctx.NewFrame();
+        ImGui.Begin("Window", new Vec2(10, 10), new Vec2(220, 140));
+        ImGui.SetCursorPos(new Vec2(20, 25));
+        ImGui.SeparatorText("Section");
+        var rect = ctx.LastItemRect;
+        ImGui.End();
+        ctx.EndFrame();
+
+        Assert.True(rect.MaxX > rect.MinX);
+
+        var drawData = ImGui.GetDrawData();
+        Assert.NotNull(drawData);
+        Assert.Single(drawData.DrawLists);
+        Assert.True(drawData.DrawLists[0].Vertices.Length > 4); // text quad(s) + lines
+
+        ImGui.SetCurrentContext(null);
+    }
+
+    [Fact]
+    public void SeparatorText_HiddenLabel_FallsBackToSeparator()
+    {
+        var ctx = new ImGuiContext();
+        ImGui.SetCurrentContext(ctx);
+        ImGui.SetDisplaySize(new Vec2(400, 300));
+
+        ctx.NewFrame();
+        ImGui.Begin("Window", new Vec2(20, 20), new Vec2(220, 100));
+        ImGui.SeparatorText("##hidden");
+        var rectHidden = ctx.LastItemRect;
+        ImGui.Separator();
+        var rectSep = ctx.LastItemRect;
+        ImGui.End();
+        ctx.EndFrame();
+
+        Assert.Equal(rectSep.MinX, rectHidden.MinX, 3);
+        Assert.Equal(rectSep.MaxX, rectHidden.MaxX, 3);
+
+        ImGui.SetCurrentContext(null);
+    }
 }

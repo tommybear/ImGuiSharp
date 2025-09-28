@@ -70,6 +70,8 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - `ImGui.NewLine` advances the cursor by current line height + spacing.
   - `ImGui.Separator` draws a 1px horizontal line across the content region and
     advances the cursor with spacing above/below, mirroring Dear ImGui.
+  - `ImGui.SeparatorText` centers a label between two separator halves; when the
+    text is hidden (`##`), it falls back to a plain separator.
 
 ## Renderer backend (Silk.NET OpenGL)
 

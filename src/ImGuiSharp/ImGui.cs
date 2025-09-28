@@ -336,6 +336,58 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Draws a separator with a centered text label.
+    /// </summary>
+    public static void SeparatorText(string label)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+
+        var renderLabel = GetRenderedLabel(label);
+        if (string.IsNullOrEmpty(renderLabel))
+        {
+            Separator();
+            return;
+        }
+
+        var ctx = GetCurrentContext();
+        var cursor = ctx.CursorPos;
+        float startX = cursor.X;
+        float maxX = ctx.GetContentRegionMaxX();
+        float available = MathF.Max(0f, maxX - startX);
+        float lineHeight = ctx.GetLineHeight();
+        float ascent = ctx.GetAscent();
+        float textWidth = ctx.MeasureTextWidth(renderLabel);
+        float padding = 6f;
+        float thickness = 1f;
+        float lineY = cursor.Y + lineHeight * 0.5f;
+        var lineColor = new ImGuiSharp.Math.Color(0.43f, 0.43f, 0.50f, 1f);
+
+        float textStart = startX;
+        if (textWidth + padding * 2f <= available)
+        {
+            textStart = startX + (available - textWidth) * 0.5f;
+        }
+
+        float leftEnd = textStart - padding;
+        if (leftEnd > startX)
+        {
+            ctx.AddRectFilled(new ImGuiRect(startX, lineY - thickness * 0.5f, leftEnd, lineY + thickness * 0.5f), lineColor);
+        }
+
+        var textPos = new Vec2(textStart, cursor.Y + ascent);
+        ctx.AddText(textPos, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+
+        float rightStart = textStart + textWidth + padding;
+        if (rightStart < maxX)
+        {
+            ctx.AddRectFilled(new ImGuiRect(rightStart, lineY - thickness * 0.5f, maxX, lineY + thickness * 0.5f), lineColor);
+        }
+
+        ctx.RegisterItem(0, new ImGuiRect(startX, cursor.Y, maxX, cursor.Y + lineHeight));
+        ctx.AdvanceCursor(new Vec2(0f, lineHeight + ctx.Style.ItemSpacing.Y));
+    }
+
+    /// <summary>
     /// Calculates the on-screen size of the given text without rendering it.
     /// Supports optional wrapping and hiding after "##" to mirror Dear ImGui.
     /// </summary>

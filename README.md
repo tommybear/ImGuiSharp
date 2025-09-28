@@ -15,7 +15,7 @@ purely for comparison while we build feature parity.
 - Fonts & text: embedded Proggy Clean TTF (Tristan Grimmer), baked at runtime
   with StbTrueTypeSharp into an RGBA atlas; `ImGui.Text`, `ImGui.Label`
 - Widgets & layout: `ImGui.Button`, `ImGui.Text`, `ImGui.Label`, `ImGui.Checkbox`, `ImGui.SliderFloat`,
-  `ImGui.Separator`, `ImGui.NewLine`, `ImGui.Begin/End`, `ImGui.BeginChild/EndChild` (padding + clipping),
+  `ImGui.Separator`, `ImGui.SeparatorText`, `ImGui.NewLine`, `ImGui.Begin/End`, `ImGui.BeginChild/EndChild` (padding + clipping),
   mouse‑wheel scrolling with persisted per‑window offset
 - Scrollbars: simple vertical thumb sized by visible/content, draggable
 - Renderer (Silk.NET OpenGL): VAO/VBO/EBO, blending, scissor, per‑command
