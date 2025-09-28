@@ -32,8 +32,7 @@ IKeyboard? keyboard = null;
 var toggle = false;
 var mousePosition = new Vec2(-100f, -100f);
 var mouseScroll = new Vec2(0f, 0f);
-var smoothedMousePosition = new Vec2(-100f, -100f);
-var smoothedButtons = new float[3];
+// Use raw input for hit-testing to avoid input-lag induced mis-clicks
 
 window.Load += () =>
 {
@@ -83,31 +82,28 @@ window.Update += deltaTime =>
         mouseScroll = Vec2.Zero;
     }
 
-    const float smoothing = 0.25f;
-    smoothedMousePosition = Vec2.Lerp(smoothedMousePosition, mousePosition, smoothing);
-
-    if (mouse is not null)
-    {
-        smoothedButtons[(int)ImGuiMouseButton.Left] = SmoothButton(smoothedButtons[(int)ImGuiMouseButton.Left], mouse.IsButtonPressed(MouseButton.Left), smoothing);
-        smoothedButtons[(int)ImGuiMouseButton.Right] = SmoothButton(smoothedButtons[(int)ImGuiMouseButton.Right], mouse.IsButtonPressed(MouseButton.Right), smoothing);
-    }
-
-    context.SetMousePosition(smoothedMousePosition);
-    context.SetMouseButtonState(ImGuiMouseButton.Left, smoothedButtons[(int)ImGuiMouseButton.Left] > 0.5f);
-    context.SetMouseButtonState(ImGuiMouseButton.Right, smoothedButtons[(int)ImGuiMouseButton.Right] > 0.5f);
+    context.SetMousePosition(mousePosition);
+    context.SetMouseButtonState(ImGuiMouseButton.Left, mouse?.IsButtonPressed(MouseButton.Left) == true);
+    context.SetMouseButtonState(ImGuiMouseButton.Right, mouse?.IsButtonPressed(MouseButton.Right) == true);
     ImGui.AddMouseWheel(mouseScroll.X, mouseScroll.Y);
 
     context.NewFrame();
 
+    // Primary button: no toggle side-effect; use a stable ID to avoid collisions
     ImGui.SetCursorPos(new Vec2(40f, 40f));
-    var pressed = ImGui.Button("Primary", new Vec2(200f, 50f));
-    if (pressed)
+    ImGui.PushID("primary");
+    var primaryPressed = ImGui.Button("Primary", new Vec2(200f, 50f));
+    ImGui.PopID();
+
+    // Toggle button: clicking this flips the state; also give it a stable ID
+    ImGui.SetCursorPos(new Vec2(40f, 110f));
+    ImGui.PushID("toggle");
+    var togglePressed = ImGui.Button(toggle ? "Toggle On" : "Toggle Off", new Vec2(200f, 45f));
+    ImGui.PopID();
+    if (togglePressed)
     {
         toggle = !toggle;
     }
-
-    ImGui.SetCursorPos(new Vec2(40f, 110f));
-    ImGui.Button(toggle ? "Toggle On" : "Toggle Off", new Vec2(200f, 45f));
 
     context.EndFrame();
 };
@@ -200,8 +196,4 @@ ImGuiKey? TryMapKey(Key key) => key switch
 };
 
 
-float SmoothButton(float current, bool target, float smoothing)
-{
-    var desired = target ? 1f : 0f;
-    return current + (desired - current) * smoothing;
-}
+// (smoothing helper removed; raw input is used for accuracy)
