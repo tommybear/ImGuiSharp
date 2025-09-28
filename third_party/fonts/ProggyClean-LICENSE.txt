@@ -1,0 +1,14 @@
+Proggy Clean (ProggyClean.ttf)
+Author: Tristan Grimmer
+
+This project embeds the Proggy Clean TrueType font as an inlined resource to
+provide a default monospaced font. The original font is distributed by its
+author free of charge. Please consult the upstream project and author for the
+most current license terms and attribution requirements.
+
+Upstream info:
+- Proggy Fonts by Tristan Grimmer (historical project page)
+- Also distributed with Dear ImGui in the misc/fonts folder for developer use
+
+If you are the copyright holder and would like different attribution or
+distribution terms applied in this repository, please open an issue.
