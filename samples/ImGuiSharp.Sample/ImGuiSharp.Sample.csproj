@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ImGuiSharp\ImGuiSharp.csproj" />
+    <ProjectReference Include="..\..\src\ImGuiSharp.Rendering.SilkNet\ImGuiSharp.Rendering.SilkNet.csproj" />
+  </ItemGroup>
+</Project>
