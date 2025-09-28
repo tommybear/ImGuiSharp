@@ -16,7 +16,7 @@
 - [ ] Implement baseline widgets (text, button, checkbox, slider, combo, separator).
 - [ ] Add style configuration and per-widget styling overrides.
 - [ ] Integrate font atlas generator and glyph rasterization pipeline.
-- [ ] Expose draw command buffers and state snapshots.
+- [x] Expose draw command buffers and state snapshots.
 
 ## Rendering Backend
 - [x] Define `IRendererBackend` abstraction (buffers, textures, shader hooks).
