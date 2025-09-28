@@ -270,6 +270,41 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Places the next item on the same line as the previous item.
+    /// When <paramref name="xOffset"/> is non-zero, sets the X position relative to the previous item's start.
+    /// </summary>
+    /// <param name="xOffset">Optional X offset from the previous item's MinX. When 0, uses previous MaxX plus spacing.</param>
+    /// <param name="spacing">Spacing in pixels between items when <paramref name="xOffset"/> is 0. Default: 8.</param>
+    public static void SameLine(float xOffset = 0f, float spacing = 8f)
+    {
+        var context = GetCurrentContext();
+        var last = context.LastItemRect;
+
+        // If no previous item exists, honor xOffset relative to current X and keep Y.
+        if (context.LastItemId == 0 && last.MinX == 0f && last.MaxX == 0f && last.MinY == 0f && last.MaxY == 0f)
+        {
+            if (xOffset != 0f)
+            {
+                var cur = context.CursorPos;
+                context.SetCursorPos(new Vec2(cur.X + xOffset, cur.Y));
+            }
+            return;
+        }
+
+        float newY = last.MinY;
+        float newX = (xOffset != 0f) ? (last.MinX + xOffset) : (last.MaxX + spacing);
+        context.SetCursorPos(new Vec2(newX, newY));
+    }
+
+    /// <summary>
+    /// Inserts a vertical gap using the default item spacing.
+    /// </summary>
+    public static void Spacing()
+    {
+        GetCurrentContext().AdvanceCursor(new Vec2(0f, 0f));
+    }
+
+    /// <summary>
     /// Checkbox with a text label. Returns true if the value changed.
     /// </summary>
     public static bool Checkbox(string label, ref bool value)

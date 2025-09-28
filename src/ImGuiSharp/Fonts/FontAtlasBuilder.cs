@@ -47,7 +47,51 @@ public static class FontAtlasBuilder
             rgba[p + 3] = a;
         }
 
-        // Use pixelHeight as an approximation for line height; baked yoff is relative to baseline.
-        return new FontAtlas(atlasWidth, atlasHeight, rgba, glyphs, lineHeight: pixelHeight, ascent: pixelHeight * 0.8f);
+        // Derive vertical metrics and kerning using stbtt font info
+        float ascentPx = pixelHeight * 0.8f;
+        float lineHeightPx = pixelHeight;
+        var kerning = new Dictionary<int, float>();
+
+        try
+        {
+            // Initialize font and compute proper v-metrics and kerning
+            var font = new StbTrueType.stbtt_fontinfo();
+            unsafe
+            {
+                fixed (byte* dataPtr = ttfBytes)
+                {
+                    if (StbTrueType.stbtt_InitFont(font, dataPtr, 0) != 0)
+                    {
+                        float scale = StbTrueType.stbtt_ScaleForPixelHeight(font, pixelHeight);
+                        int ascent, descent, lineGap;
+                        StbTrueType.stbtt_GetFontVMetrics(font, &ascent, &descent, &lineGap);
+                        ascentPx = ascent * scale;
+                        lineHeightPx = (ascent - descent + lineGap) * scale;
+
+                        // Precompute kerning for ASCII range
+                        for (int i = 0; i < charCount; i++)
+                        {
+                            int c0 = firstChar + i;
+                            for (int j = 0; j < charCount; j++)
+                            {
+                                int c1 = firstChar + j;
+                                int kern = StbTrueType.stbtt_GetCodepointKernAdvance(font, c0, c1);
+                                if (kern != 0)
+                                {
+                                    float adj = kern * scale;
+                                    kerning[(c0 << 16) | c1] = adj;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to baked approximations if stb v-metrics/kerning fail
+        }
+
+        return new FontAtlas(atlasWidth, atlasHeight, rgba, glyphs, lineHeight: lineHeightPx, ascent: ascentPx, kerning: kerning);
     }
 }

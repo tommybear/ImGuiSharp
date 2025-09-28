@@ -42,8 +42,12 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - The atlas stores glyph advances, offsets (relative to baseline) and UVs.
 
 - Rendering text
-  - `ImGuiContext.AddText` sets the builder’s current texture to the font atlas
-    and emits one quad per glyph with proper UVs and baseline positioning.
+  - `ImGuiContext.AddText` sets the builder’s current texture to the font atlas,
+    applies kerning between adjacent glyphs, and emits one quad per glyph using
+    atlas UVs and baseline positioning.
+  - Vertical metrics (ascent/line-height) come from the font’s v-metrics
+    (stbtt_GetFontVMetrics scaled by pixel height) for crisper baseline.
+  - `MeasureTextWidth` applies kerning and caches per-string widths for reuse.
   - `ImGui.Text` renders at the current cursor and advances by line height;
     `ImGui.Label` renders absolute text without affecting the cursor.
 

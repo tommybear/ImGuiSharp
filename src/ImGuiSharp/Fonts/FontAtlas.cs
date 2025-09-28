@@ -11,8 +11,9 @@ public sealed class FontAtlas
     public IReadOnlyDictionary<char, Glyph> Glyphs { get; }
     public float LineHeight { get; }
     public float Ascent { get; }
+    public IReadOnlyDictionary<int, float> Kerning { get; }
 
-    public FontAtlas(int width, int height, byte[] pixelsRgba, Dictionary<char, Glyph> glyphs, float lineHeight, float ascent)
+    public FontAtlas(int width, int height, byte[] pixelsRgba, Dictionary<char, Glyph> glyphs, float lineHeight, float ascent, Dictionary<int, float>? kerning = null)
     {
         Width = width;
         Height = height;
@@ -20,6 +21,7 @@ public sealed class FontAtlas
         Glyphs = glyphs;
         LineHeight = lineHeight;
         Ascent = ascent;
+        Kerning = kerning ?? (IReadOnlyDictionary<int, float>)new Dictionary<int, float>();
     }
 
     public readonly struct Glyph
@@ -36,5 +38,16 @@ public sealed class FontAtlas
             U0 = u0; V0 = v0; U1 = u1; V1 = v1;
         }
     }
-}
 
+    public bool TryGetKerning(char left, char right, out float adjust)
+    {
+        var key = (left << 16) | right;
+        if (Kerning is not null && Kerning.Count != 0 && Kerning.TryGetValue(key, out var k))
+        {
+            adjust = k;
+            return true;
+        }
+        adjust = 0f;
+        return false;
+    }
+}

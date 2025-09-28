@@ -28,6 +28,7 @@ public sealed class ImGuiContext
     private float _pendingMouseWheelY;
     private FontAtlas? _fontAtlas;
     private IntPtr _fontTexture;
+    private readonly Dictionary<string, float> _textWidthCache = new();
     private readonly Stack<WindowState> _windowStack = new();
     private readonly System.Collections.Generic.Dictionary<string, float> _windowScrollY = new();
     private readonly System.Collections.Generic.Dictionary<string, ScrollbarState> _windowScrollbar = new();
@@ -318,6 +319,7 @@ public sealed class ImGuiContext
     {
         _fontAtlas = atlas;
         _fontTexture = textureId;
+        _textWidthCache.Clear();
     }
 
     public float MeasureTextWidth(string text)
@@ -326,14 +328,26 @@ public sealed class ImGuiContext
         {
             return 0f;
         }
+        if (_textWidthCache.TryGetValue(text, out var cached))
+        {
+            return cached;
+        }
+
         float w = 0f;
+        char prev = '\0';
         foreach (var ch in text)
         {
             if (_fontAtlas.Glyphs.TryGetValue(ch, out var g))
             {
+                if (prev != '\0' && _fontAtlas.TryGetKerning(prev, ch, out var k))
+                {
+                    w += k;
+                }
                 w += g.Advance;
+                prev = ch;
             }
         }
+        _textWidthCache[text] = w;
         return w;
     }
 
@@ -346,11 +360,17 @@ public sealed class ImGuiContext
         SetCurrentTexture(_fontTexture);
         float x = baselinePos.X;
         float y = baselinePos.Y;
+        char prev = '\0';
         foreach (var ch in text)
         {
             if (!_fontAtlas.Glyphs.TryGetValue(ch, out var g))
             {
                 continue;
+            }
+
+            if (prev != '\0' && _fontAtlas.TryGetKerning(prev, ch, out var k))
+            {
+                x += k;
             }
 
             // Compute glyph rectangle in pixels from atlas UVs
@@ -366,6 +386,7 @@ public sealed class ImGuiContext
             _drawListBuilder.AddQuad(x0, y0, x1, y1, g.U0, g.V0, g.U1, g.V1, color);
 
             x += g.Advance;
+            prev = ch;
         }
     }
 
