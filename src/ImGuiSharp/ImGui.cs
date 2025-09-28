@@ -269,4 +269,27 @@ public static class ImGui
         context.AddText(baseline, text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
     }
 
+    /// <summary>
+    /// Sets a clip rectangle for subsequent draw calls. Use PopClipRect to restore.
+    /// </summary>
+    public static void PushClipRect(Vec2 min, Vec2 max)
+    {
+        GetCurrentContext().PushClipRect(new ImGuiSharp.Rendering.ImGuiRect(min.X, min.Y, max.X, max.Y));
+    }
+
+    /// <summary>
+    /// Pops the current clip rectangle.
+    /// </summary>
+    public static void PopClipRect() => GetCurrentContext().PopClipRect();
+
+    /// <summary>
+    /// Fills a rectangle with a solid color.
+    /// </summary>
+    public static void FillRect(Vec2 pos, Vec2 size, ImGuiSharp.Math.Color color)
+    {
+        var context = GetCurrentContext();
+        var rect = new ImGuiSharp.Rendering.ImGuiRect(pos.X, pos.Y, pos.X + size.X, pos.Y + size.Y);
+        context.AddRectFilled(rect, color);
+    }
+
 }

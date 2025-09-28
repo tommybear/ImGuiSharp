@@ -13,6 +13,8 @@ internal sealed class ImGuiDrawListBuilder
     private readonly List<ushort> _indices = new();
     private readonly List<ImGuiDrawCommand> _commands = new();
     private IntPtr _currentTexture = IntPtr.Zero;
+    private bool _hasClip;
+    private ImGuiRect _clipRect;
 
     /// <summary>
     /// Resets the accumulated geometry.
@@ -55,7 +57,8 @@ internal sealed class ImGuiDrawListBuilder
         _indices.Add((ushort)(baseIndex + 2));
         _indices.Add((ushort)(baseIndex + 3));
 
-        _commands.Add(new ImGuiDrawCommand(6, rect, _currentTexture));
+        var clip = _hasClip ? _clipRect : rect;
+        _commands.Add(new ImGuiDrawCommand(6, clip, _currentTexture));
     }
 
     public void AddQuad(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, Color color)
@@ -79,13 +82,24 @@ internal sealed class ImGuiDrawListBuilder
         _indices.Add((ushort)(baseIndex + 2));
         _indices.Add((ushort)(baseIndex + 3));
 
-        var clip = new ImGuiRect(x0, y0, x1, y1);
+        var clip = _hasClip ? _clipRect : new ImGuiRect(x0, y0, x1, y1);
         _commands.Add(new ImGuiDrawCommand(6, clip, _currentTexture));
     }
 
     public void SetTexture(IntPtr textureId)
     {
         _currentTexture = textureId;
+    }
+
+    public void PushClipRect(ImGuiRect rect)
+    {
+        _hasClip = true;
+        _clipRect = rect;
+    }
+
+    public void PopClipRect()
+    {
+        _hasClip = false;
     }
 
     /// <summary>

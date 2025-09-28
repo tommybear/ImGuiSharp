@@ -301,6 +301,16 @@ public sealed class ImGuiContext
         _drawListBuilder.SetTexture(textureId);
     }
 
+    internal void PushClipRect(in ImGuiRect rect)
+    {
+        _drawListBuilder.PushClipRect(rect);
+    }
+
+    internal void PopClipRect()
+    {
+        _drawListBuilder.PopClipRect();
+    }
+
     public void SetDefaultFont(FontAtlas atlas, IntPtr textureId)
     {
         _fontAtlas = atlas;

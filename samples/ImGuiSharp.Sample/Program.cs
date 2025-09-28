@@ -32,6 +32,9 @@ IKeyboard? keyboard = null;
 var toggle = false;
 var mousePosition = new Vec2(-100f, -100f);
 var mouseScroll = new Vec2(0f, 0f);
+float scrollY = 0f;
+
+static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
 
 window.Load += () =>
@@ -113,6 +116,42 @@ window.Update += deltaTime =>
 
     // Demonstrate Label helper (absolute position, not affecting cursor)
     ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 180f));
+
+    // Scrollable region demo
+    var regionPos = new Vec2(260f, 110f);
+    var regionSize = new Vec2(280f, 160f);
+    var regionMin = regionPos;
+    var regionMax = new Vec2(regionPos.X + regionSize.X, regionPos.Y + regionSize.Y);
+    ImGui.FillRect(regionPos, regionSize, new ImGuiSharp.Math.Color(0.12f, 0.14f, 0.18f, 1f));
+    ImGui.PushClipRect(regionMin, regionMax);
+
+    // Simple list content
+    const int itemCount = 30;
+    var lineH = context.GetLineHeight() + 4f;
+    var contentH = itemCount * lineH + 8f;
+    // static scroll offset
+    scrollY = Clamp(scrollY, 0f, MathF.Max(0f, contentH - regionSize.Y));
+    // If hovering region, apply wheel
+    var hovering = mousePosition.X >= regionMin.X && mousePosition.X <= regionMax.X &&
+                   mousePosition.Y >= regionMin.Y && mousePosition.Y <= regionMax.Y;
+    if (hovering)
+    {
+        var dy = ImGui.GetIO().MouseWheel;
+        if (MathF.Abs(dy) > 0f)
+        {
+            scrollY = Clamp(scrollY - dy * 40f, 0f, MathF.Max(0f, contentH - regionSize.Y));
+        }
+    }
+
+    // Draw items with vertical offset
+    var y = regionPos.Y + 8f - scrollY;
+    for (int i = 0; i < itemCount; i++)
+    {
+        ImGui.Label($"Item {i}", new Vec2(regionPos.X + 8f, y));
+        y += lineH;
+    }
+
+    ImGui.PopClipRect();
 
     context.EndFrame();
 };
