@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ImGuiSharp.Input;
 using ImGuiSharp.Math;
+using ImGuiSharp.Rendering;
 
 namespace ImGuiSharp;
 
@@ -10,6 +11,7 @@ namespace ImGuiSharp;
 /// </summary>
 public static class ImGui
 {
+    private static readonly Vec2 DefaultButtonSize = new(120f, 36f);
     private static ImGuiContext? _currentContext;
 
     /// <summary>
@@ -96,6 +98,35 @@ public static class ImGui
     public static ImGuiKeyStateSnapshot GetKeyState() => GetCurrentContext().GetKeyState();
 
     /// <summary>
+    /// Sets the cursor position for the upcoming item.
+    /// </summary>
+    public static void SetCursorPos(Vec2 position) => GetCurrentContext().SetCursorPos(position);
+
+    /// <summary>
+    /// Gets the current cursor position.
+    /// </summary>
+    public static Vec2 GetCursorPos() => GetCurrentContext().CursorPos;
+
+    /// <summary>
+    /// Pushes an identifier onto the ID stack using a string seed.
+    /// </summary>
+    public static void PushID(string id)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+        GetCurrentContext().PushId(id);
+    }
+
+    /// <summary>
+    /// Pushes an identifier onto the ID stack using an integer seed.
+    /// </summary>
+    public static void PushID(int id) => GetCurrentContext().PushId(unchecked((uint)id));
+
+    /// <summary>
+    /// Pops the most recently pushed ID from the stack.
+    /// </summary>
+    public static void PopID() => GetCurrentContext().PopId();
+
+    /// <summary>
     /// Queues an input event for the active context.
     /// </summary>
     /// <param name="inputEvent">The input event to enqueue.</param>
@@ -112,5 +143,51 @@ public static class ImGui
     public static IReadOnlyList<IImGuiInputEvent> DrainInputEvents()
     {
         return GetCurrentContext().DrainInputEvents();
+    }
+
+    /// <summary>
+    /// Renders an interactive button and returns true when the button is clicked.
+    /// </summary>
+    /// <param name="label">Display label for the button.</param>
+    /// <param name="size">Optional size. When omitted a default size is used.</param>
+    public static bool Button(string label, Vec2? size = null)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+
+        var context = GetCurrentContext();
+        var id = context.GetId(label);
+        var cursor = context.CursorPos;
+        var actualSize = size ?? DefaultButtonSize;
+        var rectMax = cursor + actualSize;
+        var rect = new ImGuiRect(cursor.X, cursor.Y, rectMax.X, rectMax.Y);
+        context.RegisterItem(id, rect);
+
+        var isHovered = context.IsMouseHoveringRect(cursor, rectMax);
+        if (isHovered)
+        {
+            context.SetHoveredId(id);
+        }
+
+        var pressed = false;
+        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && isHovered)
+        {
+            context.SetActiveId(id);
+        }
+
+        if (context.ActiveId == id)
+        {
+            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
+            {
+                if (isHovered)
+                {
+                    pressed = true;
+                }
+
+                context.ClearActiveId();
+            }
+        }
+
+        context.AdvanceCursor(actualSize);
+        return pressed;
     }
 }

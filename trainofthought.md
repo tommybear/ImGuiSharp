@@ -33,3 +33,4 @@
 - 2024-05-17: Added timing, mouse, and key state tracking to context and wired facade helpers to expose them.
 - 2024-05-17: Defined draw data structures with vertex/index buffers, clip rects, and texture ids; added tests.
 - 2024-05-17: Added Vec2/Vec4/Color primitives and integrated them into IO, context, and draw data pipelines.
+- 2024-05-17: Implemented button widget with ID stack, hover/active tracking, and unit tests.

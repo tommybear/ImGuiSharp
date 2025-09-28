@@ -15,6 +15,7 @@
 - [ ] Build ID stack, item registration, and focus/hover rules.
 - [ ] Implement layout engine basics (window stacks, columns, clipping, scrolling).
 - [ ] Implement baseline widgets (text, button, checkbox, slider, combo, separator).
+  - [x] Add button widget with ID stack handling and hover/press tests.
 - [ ] Add style configuration and per-widget styling overrides.
 - [ ] Integrate font atlas generator and glyph rasterization pipeline.
 - [x] Expose draw command buffers and state snapshots.

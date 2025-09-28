@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.CompilerServices;
 
 namespace ImGuiSharp.Math;
 
@@ -26,6 +25,16 @@ public readonly struct Vec2 : IEquatable<Vec2>
     /// Gets the Y component.
     /// </summary>
     public float Y { get; }
+
+    /// <summary>
+    /// Gets a zero vector.
+    /// </summary>
+    public static Vec2 Zero => new(0f, 0f);
+
+    /// <summary>
+    /// Gets a vector of ones.
+    /// </summary>
+    public static Vec2 One => new(1f, 1f);
 
     /// <summary>
     /// Gets the squared length of the vector.

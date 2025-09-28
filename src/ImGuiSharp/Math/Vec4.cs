@@ -19,6 +19,11 @@ public readonly struct Vec4 : IEquatable<Vec4>
     }
 
     /// <summary>
+    /// Gets a zero vector.
+    /// </summary>
+    public static Vec4 Zero => new(0f, 0f, 0f, 0f);
+
+    /// <summary>
     /// Gets the X component.
     /// </summary>
     public float X { get; }
