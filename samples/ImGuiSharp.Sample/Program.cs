@@ -94,6 +94,12 @@ window.Update += deltaTime =>
     ImGui.PushID("primary");
     var primaryPressed = ImGui.Button("Primary", new Vec2(200f, 50f));
     ImGui.PopID();
+    if (primaryPressed)
+    {
+        // Demonstrate Text helper by printing a transient message below
+        ImGui.SetCursorPos(new Vec2(260f, 40f));
+        ImGui.Text("Primary clicked!");
+    }
 
     // Toggle button: clicking this flips the state; also give it a stable ID
     ImGui.SetCursorPos(new Vec2(40f, 110f));
@@ -104,6 +110,9 @@ window.Update += deltaTime =>
     {
         toggle = !toggle;
     }
+
+    // Demonstrate Label helper (absolute position, not affecting cursor)
+    ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 180f));
 
     context.EndFrame();
 };

@@ -238,4 +238,35 @@ public static class ImGui
         return pressed;
     }
 
+    /// <summary>
+    /// Renders a line of text at the current cursor, advancing the cursor vertically.
+    /// </summary>
+    public static void Text(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var context = GetCurrentContext();
+        var baseline = new Vec2(context.CursorPos.X, context.CursorPos.Y + context.GetAscent());
+        context.AddText(baseline, text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        context.AdvanceCursor(new Vec2(0f, context.GetLineHeight()));
+    }
+
+    /// <summary>
+    /// Renders a non-interactive label at an absolute position. Does not change cursor.
+    /// </summary>
+    public static void Label(string text, Vec2 position)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var context = GetCurrentContext();
+        var baseline = new Vec2(position.X, position.Y + context.GetAscent());
+        context.AddText(baseline, text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+    }
+
 }

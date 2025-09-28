@@ -414,4 +414,8 @@ public sealed class ImGuiContext
 
         return new ImGuiDrawData(new[] { drawList }, displayRect);
     }
+
+    public float GetLineHeight() => _fontAtlas?.LineHeight ?? 16f;
+
+    public float GetAscent() => _fontAtlas?.Ascent ?? 12f;
 }
