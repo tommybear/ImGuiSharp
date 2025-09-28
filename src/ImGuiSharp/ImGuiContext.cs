@@ -12,7 +12,7 @@ namespace ImGuiSharp;
 /// </summary>
 public sealed class ImGuiContext
 {
-    private const float DefaultItemSpacingY = 4f;
+    private const float DefaultItemSpacingY = 4f; // legacy default; replaced by Style.ItemSpacing.Y
 
     private readonly List<IImGuiInputEvent> _inputEvents = new();
     private readonly bool[] _mouseButtons = new bool[3];
@@ -41,12 +41,18 @@ public sealed class ImGuiContext
     public ImGuiContext(ImGuiIO? io = null)
     {
         IO = io ?? new ImGuiIO();
+        Style = new ImGuiStyle();
     }
 
     /// <summary>
     /// Gets the IO configuration associated with this context.
     /// </summary>
     public ImGuiIO IO { get; }
+
+    /// <summary>
+    /// Global style configuration (spacing, padding, etc.).
+    /// </summary>
+    public ImGuiStyle Style { get; }
 
     /// <summary>
     /// Gets a value indicating whether a frame is currently in progress.
@@ -216,7 +222,8 @@ public sealed class ImGuiContext
     /// </summary>
     public void AdvanceCursor(in Vec2 itemSize)
     {
-        _cursorPos = new Vec2(_cursorPos.X, _cursorPos.Y + itemSize.Y + DefaultItemSpacingY);
+        var spacingY = Style.ItemSpacing.Y;
+        _cursorPos = new Vec2(_cursorPos.X, _cursorPos.Y + itemSize.Y + spacingY);
     }
 
     /// <summary>

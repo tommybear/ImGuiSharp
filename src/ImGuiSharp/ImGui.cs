@@ -168,6 +168,7 @@ public static class ImGui
 
         var context = GetCurrentContext();
         var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
         var actualSize = size ?? DefaultButtonSize;
         var rectMax = cursor + actualSize;
@@ -219,9 +220,9 @@ public static class ImGui
 
         context.AddRectFilled(rect, drawColor);
         // Draw label text if default font is set
-        if (!string.IsNullOrEmpty(label))
+        if (!string.IsNullOrEmpty(renderLabel))
         {
-            var textWidth = context.MeasureTextWidth(label);
+            var textWidth = context.MeasureTextWidth(renderLabel);
             var fontLine = 16f; // fallback if no font
             var atlasField = typeof(ImGuiContext).GetField("_fontAtlas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             if (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas atlas)
@@ -231,7 +232,7 @@ public static class ImGui
             var textPos = new Vec2(
                 cursor.X + (actualSize.X - textWidth) * 0.5f,
                 cursor.Y + (actualSize.Y - fontLine) * 0.5f + (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas a ? a.Ascent : 0f));
-            context.AddText(textPos, label, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            context.AddText(textPos, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
         }
 
         context.AdvanceCursor(actualSize);
@@ -275,7 +276,7 @@ public static class ImGui
     /// </summary>
     /// <param name="xOffset">Optional X offset from the previous item's MinX. When 0, uses previous MaxX plus spacing.</param>
     /// <param name="spacing">Spacing in pixels between items when <paramref name="xOffset"/> is 0. Default: 8.</param>
-    public static void SameLine(float xOffset = 0f, float spacing = 8f)
+    public static void SameLine(float xOffset = 0f, float spacing = -1f)
     {
         var context = GetCurrentContext();
         var last = context.LastItemRect;
@@ -292,7 +293,8 @@ public static class ImGui
         }
 
         float newY = last.MinY;
-        float newX = (xOffset != 0f) ? (last.MinX + xOffset) : (last.MaxX + spacing);
+        float effectiveSpacing = spacing < 0f ? context.Style.ItemSpacing.X : spacing;
+        float newX = (xOffset != 0f) ? (last.MinX + xOffset) : (last.MaxX + effectiveSpacing);
         context.SetCursorPos(new Vec2(newX, newY));
     }
 
@@ -620,6 +622,7 @@ public static class ImGui
     {
         var context = GetCurrentContext();
         var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
         var lineH = context.GetLineHeight();
         float boxSize = MathF.Min(16f, lineH);
@@ -663,10 +666,10 @@ public static class ImGui
         }
 
         // Draw label to the right
-        if (!string.IsNullOrEmpty(label))
+        if (!string.IsNullOrEmpty(renderLabel))
         {
             var baseline = new Vec2(rect.MaxX + 8f, rect.MinY + context.GetAscent());
-            context.AddText(baseline, label, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            context.AddText(baseline, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
         }
 
         context.AdvanceCursor(new Vec2(0f, lineH));
@@ -680,6 +683,7 @@ public static class ImGui
     {
         var context = GetCurrentContext();
         var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
         var lineH = context.GetLineHeight();
         var sz = size ?? new Vec2(200f, MathF.Max(18f, lineH));
@@ -726,10 +730,10 @@ public static class ImGui
         FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), fillCol);
 
         // Label & value text
-        if (!string.IsNullOrEmpty(label))
+        if (!string.IsNullOrEmpty(renderLabel))
         {
             var valText = (format == null) ? value.ToString("0.00") : string.Format(format, value);
-            var text = string.Concat(label, ": ", valText);
+            var text = string.Concat(renderLabel, ": ", valText);
             var baseline = new Vec2(rect.MinX, rect.MinY - context.GetAscent() + sz.Y + context.GetAscent());
             // draw below slider
             context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
@@ -737,6 +741,13 @@ public static class ImGui
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
         return released; // true when user released (committed) the drag
+    }
+
+    private static string GetRenderedLabel(string label)
+    {
+        if (string.IsNullOrEmpty(label)) return string.Empty;
+        var idx = label.IndexOf("##", StringComparison.Ordinal);
+        return idx >= 0 ? label.Substring(0, idx) : label;
     }
 
     private static float Clamp01(float v) => (v < 0f) ? 0f : (v > 1f ? 1f : v);
