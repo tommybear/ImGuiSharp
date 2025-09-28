@@ -45,6 +45,7 @@ internal sealed class ImGuiDrawListBuilder
         var bottomRight = new Vec2(rect.MaxX, rect.MaxY);
         var bottomLeft = new Vec2(rect.MinX, rect.MaxY);
 
+        // UVs are irrelevant for solid fills; renderer binds a 1x1 white texture when TextureId == 0
         _vertices.Add(ImGuiVertex.From(topLeft, new Vec2(0f, 0f), color));
         _vertices.Add(ImGuiVertex.From(topRight, new Vec2(1f, 0f), color));
         _vertices.Add(ImGuiVertex.From(bottomRight, new Vec2(1f, 1f), color));
@@ -58,7 +59,7 @@ internal sealed class ImGuiDrawListBuilder
         _indices.Add((ushort)(baseIndex + 3));
 
         var clip = _hasClip ? _clipRect : rect;
-        _commands.Add(new ImGuiDrawCommand(6, clip, _currentTexture));
+        _commands.Add(new ImGuiDrawCommand(6, clip, IntPtr.Zero));
     }
 
     public void AddQuad(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, Color color)

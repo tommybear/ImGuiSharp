@@ -18,10 +18,10 @@
 - Run all tests through `dotnet test` with coverage reporting via `coverlet`.
 
 ## Test Layers
-- **Foundation tests**: geometry helpers, colour math, input lifting, font atlas builders.
+- **Foundation tests**: geometry helpers, colour math, input lifting, font atlas builders (StbTrueTypeSharp path).
 - **Widget tests**: button activation, sliders, text inputs—cover state transitions and ID resolution.
 - **Layout tests**: verify item spacing, window positioning, scrolling, and clipping behaviour.
-- **Rendering contract tests**: ensure the renderer interface receives the expected draw lists.
+- **Rendering contract tests**: ensure the renderer interface receives the expected draw lists; verify per-command texture IDs and default texture behaviour.
 - **End-to-end smoke**: small scripted UI flows executed against a headless backend to guard frame lifecycle.
 
 ## Workflow
@@ -39,9 +39,14 @@
 ## Test Data & Fixtures
 - Maintain canonical JSON fixtures for representative frame inputs and expected draw command sequences.
 - Reuse deterministic pseudo-random seeds when fuzzing widget interactions.
-- Store small font atlases and glyph ranges in `tests/fixtures/` to keep repository size manageable.
+- Store small font atlases and glyph ranges in `tests/fixtures/` to keep repository size manageable; include an embedded Proggy Clean slice for deterministic text tests.
 
 ## Handling Regressions
 - When a bug is reported, first reproduce with a failing test.
 - Codify the scenario in the suite before applying the fix.
 - Add a changelog entry referencing the regression test to prevent recurrence.
+
+## Recent Additions To Cover
+- Text/Label layout using ascent/line-height; kerning (once added).
+- Child window scroll persistence and scrollbar dragging interactions.
+- Solid-fill commands do not sample atlas (TextureId == 0 binds white texture).

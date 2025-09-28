@@ -37,3 +37,7 @@
 - 2024-05-17: Expanded Silk.NET backend with shader/VAO/VBO setup and buffer upload stubs.
 - 2024-05-17: Wired sample app to Silk.NET window loop to draw test triangle via render pipeline.
 - 2024-05-17: Routed Silk.NET mouse/keyboard events into ImGui context; sample now reacts to hover/click.
+- 2024-05-17: Added Text and Label helpers; embedded Proggy Clean font and StbTrueTypeSharp atlas builder; per-command texture binding in renderer.
+- 2024-05-17: Introduced draw-list builder with clip rect stack; PushClipRect/PopClipRect/FillRect.
+- 2024-05-17: Implemented Begin/End and BeginChild/EndChild with clip + padding and wheel scrolling; persisted per-window ScrollY.
+- 2024-05-17: Added simple vertical scrollbar with draggable thumb; fixed scissor-aware clear and solid-fill texture binding.

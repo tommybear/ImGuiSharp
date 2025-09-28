@@ -14,11 +14,13 @@
 - Implement primary widgets (text, buttons, basic inputs) and window/layout system.
 - Finish clipping, scrolling, child windows, and style overrides.
 - Add golden tests for layout scenarios and widget interactions.
+- Status: text/label + buttons complete; child windows with wheel scrolling and basic draggable scrollbar implemented.
 
 ## Milestone 3 – Rendering Backend (Weeks 10-13)
 - Finalise renderer abstraction and complete the reference OpenGL backend.
 - Integrate font atlas pipeline and texture uploads.
 - Provide sample app rendering the minimal demo suite.
+- Status: GL backend draws via VAO/VBO/EBO; per-command texture binding; default 1×1 white texture; scissor-aware clear fix.
 
 ## Milestone 4 – Quality & Packaging (Weeks 13-16)
 - Harden API, add documentation, and polish developer ergonomics.
