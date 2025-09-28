@@ -668,7 +668,7 @@ public static class ImGui
         // Draw label to the right
         if (!string.IsNullOrEmpty(renderLabel))
         {
-            var baseline = new Vec2(rect.MaxX + 8f, rect.MinY + context.GetAscent());
+            var baseline = new Vec2(rect.MaxX + context.Style.ItemSpacing.X, rect.MinY + context.GetAscent());
             context.AddText(baseline, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
         }
 
@@ -699,6 +699,7 @@ public static class ImGui
             context.SetActiveId(id);
         }
 
+        bool changed = false;
         // While dragging, map mouse X to value
         if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
         {
@@ -712,6 +713,7 @@ public static class ImGui
             if (newVal != value)
             {
                 value = newVal;
+                changed = true;
             }
         }
 
@@ -719,6 +721,27 @@ public static class ImGui
         if (released)
         {
             context.ClearActiveId();
+        }
+
+        // Keyboard control when active or hovered
+        if (context.ActiveId == id || hovered)
+        {
+            var keys = context.GetKeyState();
+            float range = max - min;
+            float stepSmall = range * 0.01f;
+            float stepLarge = range * 0.10f;
+
+            float v0 = value;
+            if (keys.IsPressed(Input.ImGuiKey.Left)) value -= stepSmall;
+            if (keys.IsPressed(Input.ImGuiKey.Right)) value += stepSmall;
+            if (keys.IsPressed(Input.ImGuiKey.PageDown)) value -= stepLarge;
+            if (keys.IsPressed(Input.ImGuiKey.PageUp)) value += stepLarge;
+            if (keys.IsPressed(Input.ImGuiKey.Home)) value = min;
+            if (keys.IsPressed(Input.ImGuiKey.End)) value = max;
+
+            if (value < min) value = min;
+            if (value > max) value = max;
+            if (value != v0) changed = true;
         }
 
         // Draw track and knob
@@ -740,7 +763,7 @@ public static class ImGui
         }
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
-        return released; // true when user released (committed) the drag
+        return changed || released; // true when value changed this frame or on commit
     }
 
     private static string GetRenderedLabel(string label)

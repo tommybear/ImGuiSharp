@@ -1,0 +1,40 @@
+{
+  // Copy this folder to `.vscode/` to enable debugging in VS Code
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET Launch Sample (ImGuiSharp.Sample)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/samples/ImGuiSharp.Sample/bin/Debug/net6.0/ImGuiSharp.Sample.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "justMyCode": true,
+      "env": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": ".NET Run Tests (console)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "/usr/bin/env",
+      "args": [
+        "dotnet",
+        "test",
+        "ImGuiSharp.sln",
+        "--nologo"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": ".NET Attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ]
+}
+

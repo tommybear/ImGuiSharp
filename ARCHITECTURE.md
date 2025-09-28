@@ -147,3 +147,7 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   and text measurement baselines.
 - Rendering contract: verify draw‑command sequences (clip/texture ids) and a
   non‑blank off‑screen sanity render.
+
+## Tooling
+
+- Editors: VS Code launch/tasks are provided under `.vscode.sample/`. Copy to `.vscode/` locally if you want to debug the sample (`coreclr` launch) or run the test suite via tasks.

@@ -40,6 +40,13 @@ Run the sample (opens a window with labeled buttons and a scrollable child):
 dotnet run --project samples/ImGuiSharp.Sample
 ```
 
+## VS Code
+
+- Debugging configs are included under `.vscode/`.
+  - Use ".NET Launch Sample (ImGuiSharp.Sample)" to run the sample app with a debugger.
+  - Use ".NET Run Tests (console)" to run the test suite from the terminal.
+- Tasks: `restore`, `build`, and `test` tasks are available and wired to the launch config.
+
 ## Minimal usage (sketch)
 
 ```csharp

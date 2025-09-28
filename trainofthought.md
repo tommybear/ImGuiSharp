@@ -45,3 +45,4 @@
 - 2025-09-28: Added ARCHITECTURE.md section "How To Add A New Widget" with guidance on IDs, hit-testing, drawing, layout, and tests; linked from README.
 - 2025-09-28: Text: applied kerning via stbtt_GetCodepointKernAdvance (ASCII cache), improved ascent/line-height from font v-metrics, and added per-string width cache in context; updated ARCHITECTURE.md text pipeline notes.
 - 2025-09-28: Wrapped text + measurement aligned to Dear ImGui: added PushTextWrapPos/PopTextWrapPos, TextWrapped() (auto wrap at content width), and CalcTextSize(text, wrapWidth=-1, hideAfterDoubleHash=false) with tests.
+- 2025-09-28: Added VS Code debugging/tasks config under `.vscode.sample/` and documented how to use it in README/ARCHITECTURE.

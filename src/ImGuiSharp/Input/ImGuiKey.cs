@@ -78,6 +78,12 @@ public enum ImGuiKey
     Up,
     Down,
 
+    // Navigation extended
+    Home,
+    End,
+    PageUp,
+    PageDown,
+
     // Number row
     D0,
     D1,

@@ -67,6 +67,9 @@ public sealed class SameLineSpacingTests
         ImGui.SetCurrentContext(ctx);
         ImGui.SetDisplaySize(new Vec2(400, 300));
 
+        // Increase style spacing to verify it is used
+        ctx.Style.ItemSpacing = new Vec2(ctx.Style.ItemSpacing.X, 12f);
+
         ctx.NewFrame();
         ImGui.SetCursorPos(new Vec2(5f, 10f));
         var before = ImGui.GetCursorPos();
@@ -75,9 +78,8 @@ public sealed class SameLineSpacingTests
         ctx.EndFrame();
 
         Assert.Equal(before.X, after.X, 3);
-        Assert.True(after.Y > before.Y);
+        Assert.Equal(before.Y + 12f, after.Y, 3);
 
         ImGui.SetCurrentContext(null);
     }
 }
-
