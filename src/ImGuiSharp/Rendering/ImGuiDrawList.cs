@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ImGuiSharp.Math;
 
 namespace ImGuiSharp.Rendering;
 
@@ -18,7 +19,9 @@ public sealed class ImGuiDrawList
     /// <param name="vertices">The vertex buffer for the list.</param>
     /// <param name="indices">The index buffer for the list.</param>
     /// <param name="commands">The commands describing how to render the list.</param>
-    public ImGuiDrawList(ImGuiVertex[] vertices, ushort[] indices, IReadOnlyList<ImGuiDrawCommand> commands)
+    /// <param name="bufferPos">Origin offset for vertex coordinates.</param>
+    /// <param name="bufferScale">Scale applied to vertex coordinates.</param>
+    public ImGuiDrawList(ImGuiVertex[] vertices, ushort[] indices, IReadOnlyList<ImGuiDrawCommand> commands, Vec2? bufferPos = null, Vec2? bufferScale = null)
     {
         ArgumentNullException.ThrowIfNull(vertices);
         ArgumentNullException.ThrowIfNull(indices);
@@ -34,6 +37,8 @@ public sealed class ImGuiDrawList
         }
 
         _commands = copiedCommands;
+        BufferPos = bufferPos ?? new Vec2(0f, 0f);
+        BufferScale = bufferScale ?? new Vec2(1f, 1f);
     }
 
     /// <summary>
@@ -50,4 +55,14 @@ public sealed class ImGuiDrawList
     /// Gets the commands associated with this draw list.
     /// </summary>
     public IReadOnlyList<ImGuiDrawCommand> Commands => _commands;
+
+    /// <summary>
+    /// Gets the vertex buffer origin offset.
+    /// </summary>
+    public Vec2 BufferPos { get; }
+
+    /// <summary>
+    /// Gets the vertex buffer scale.
+    /// </summary>
+    public Vec2 BufferScale { get; }
 }

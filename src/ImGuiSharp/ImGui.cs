@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ImGuiSharp.Input;
+using ImGuiSharp.Math;
 
 namespace ImGuiSharp;
 
@@ -15,10 +16,7 @@ public static class ImGui
     /// Sets the current context. Pass <c>null</c> to clear the active context.
     /// </summary>
     /// <param name="context">The context to make current.</param>
-    public static void SetCurrentContext(ImGuiContext? context)
-    {
-        _currentContext = context;
-    }
+    public static void SetCurrentContext(ImGuiContext? context) => _currentContext = context;
 
     /// <summary>
     /// Gets the current context or throws if none has been assigned.
@@ -58,9 +56,24 @@ public static class ImGui
     public static float GetTime() => GetCurrentContext().GetTime();
 
     /// <summary>
+    /// Sets the display size of the active context.
+    /// </summary>
+    public static void SetDisplaySize(Vec2 size) => GetCurrentContext().IO.DisplaySize = size;
+
+    /// <summary>
+    /// Gets the display size of the active context.
+    /// </summary>
+    public static Vec2 GetDisplaySize() => GetCurrentContext().IO.DisplaySize;
+
+    /// <summary>
     /// Sets the current mouse cursor position.
     /// </summary>
-    public static void SetMousePosition(float x, float y) => GetCurrentContext().SetMousePosition(x, y);
+    public static void SetMousePosition(float x, float y) => SetMousePosition(new Vec2(x, y));
+
+    /// <summary>
+    /// Sets the current mouse cursor position.
+    /// </summary>
+    public static void SetMousePosition(Vec2 position) => GetCurrentContext().SetMousePosition(position);
 
     /// <summary>
     /// Updates a mouse button state.

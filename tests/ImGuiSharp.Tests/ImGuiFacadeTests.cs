@@ -1,6 +1,7 @@
 using System;
 using ImGuiSharp;
 using ImGuiSharp.Input;
+using ImGuiSharp.Math;
 using Xunit;
 
 namespace ImGuiSharp.Tests;
@@ -87,6 +88,19 @@ public sealed class ImGuiFacadeTests : IDisposable
         Assert.Equal(5f, mouse.PositionX);
         Assert.Equal(6f, mouse.PositionY);
         Assert.True(mouse.IsPressed(ImGuiMouseButton.Left));
+        Assert.Equal(new Vec2(5f, 6f), ImGui.GetIO().MousePosition);
+    }
+
+
+    [Fact]
+    public void DisplaySize_CanBeUpdatedThroughFacade()
+    {
+        var context = new ImGuiContext();
+        ImGui.SetCurrentContext(context);
+
+        ImGui.SetDisplaySize(new Vec2(1920f, 1080f));
+
+        Assert.Equal(new Vec2(1920f, 1080f), ImGui.GetIO().DisplaySize);
     }
 
     [Fact]

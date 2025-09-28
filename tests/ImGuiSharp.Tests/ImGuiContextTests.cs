@@ -1,6 +1,7 @@
 using System;
 using ImGuiSharp;
 using ImGuiSharp.Input;
+using ImGuiSharp.Math;
 using Xunit;
 
 namespace ImGuiSharp.Tests;
@@ -52,6 +53,7 @@ public sealed class ImGuiContextTests
         Assert.Equal(20f, mouse.PositionY);
         Assert.True(mouse.IsPressed(ImGuiMouseButton.Left));
         Assert.False(mouse.IsPressed(ImGuiMouseButton.Right));
+        Assert.Equal(new Vec2(10f, 20f), context.IO.MousePosition);
     }
 
     [Fact]

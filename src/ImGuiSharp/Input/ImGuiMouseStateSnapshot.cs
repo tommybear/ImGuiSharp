@@ -1,4 +1,5 @@
 using System;
+using ImGuiSharp.Math;
 
 namespace ImGuiSharp.Input;
 
@@ -9,22 +10,26 @@ public readonly struct ImGuiMouseStateSnapshot
 {
     private readonly bool[]? _buttons;
 
-    internal ImGuiMouseStateSnapshot(float positionX, float positionY, bool[] buttonStates)
+    internal ImGuiMouseStateSnapshot(Vec2 position, bool[] buttonStates)
     {
-        PositionX = positionX;
-        PositionY = positionY;
+        Position = position;
         _buttons = (bool[])buttonStates.Clone();
     }
 
     /// <summary>
+    /// Gets the mouse position in pixels.
+    /// </summary>
+    public Vec2 Position { get; }
+
+    /// <summary>
     /// Gets the X coordinate of the mouse cursor in pixels.
     /// </summary>
-    public float PositionX { get; }
+    public float PositionX => Position.X;
 
     /// <summary>
     /// Gets the Y coordinate of the mouse cursor in pixels.
     /// </summary>
-    public float PositionY { get; }
+    public float PositionY => Position.Y;
 
     /// <summary>
     /// Gets a read-only view over the mouse button states.

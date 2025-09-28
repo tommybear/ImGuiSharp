@@ -1,5 +1,6 @@
 using System;
 using ImGuiSharp.Input;
+using ImGuiSharp.Math;
 
 namespace ImGuiSharp;
 
@@ -9,6 +10,8 @@ namespace ImGuiSharp;
 public sealed class ImGuiIO
 {
     private readonly bool[] _mouseButtons = new bool[3];
+    private Vec2 _displaySize = new(1280f, 720f);
+    private Vec2 _mousePosition;
 
     /// <summary>
     /// Gets or sets the elapsed time between frames in seconds.
@@ -16,29 +19,27 @@ public sealed class ImGuiIO
     public float DeltaTime { get; set; } = 1f / 60f;
 
     /// <summary>
-    /// Gets or sets the logical width of the display surface in pixels.
+    /// Gets or sets the logical display size in pixels.
     /// </summary>
-    public float DisplayWidth { get; set; } = 1280f;
+    public Vec2 DisplaySize
+    {
+        get => _displaySize;
+        set => _displaySize = value;
+    }
 
     /// <summary>
-    /// Gets or sets the logical height of the display surface in pixels.
-    /// </summary>
-    public float DisplayHeight { get; set; } = 720f;
-
-    /// <summary>
-    /// Gets the accumulated time since the context was created.
+    /// Gets or sets the accumulated time since the context was created.
     /// </summary>
     public float Time { get; internal set; }
 
     /// <summary>
-    /// Gets the current mouse X position in pixels.
+    /// Gets or sets the current mouse position in pixels.
     /// </summary>
-    public float MousePositionX { get; internal set; }
-
-    /// <summary>
-    /// Gets the current mouse Y position in pixels.
-    /// </summary>
-    public float MousePositionY { get; internal set; }
+    public Vec2 MousePosition
+    {
+        get => _mousePosition;
+        internal set => _mousePosition = value;
+    }
 
     /// <summary>
     /// Gets a read-only view over the mouse button state array.
@@ -51,11 +52,9 @@ public sealed class ImGuiIO
     public void Reset()
     {
         DeltaTime = 1f / 60f;
-        DisplayWidth = 1280f;
-        DisplayHeight = 720f;
+        _displaySize = new Vec2(1280f, 720f);
         Time = 0f;
-        MousePositionX = 0f;
-        MousePositionY = 0f;
+        _mousePosition = Vec2Zero;
         Array.Clear(_mouseButtons, 0, _mouseButtons.Length);
     }
 
@@ -69,4 +68,6 @@ public sealed class ImGuiIO
 
         _mouseButtons[index] = isPressed;
     }
+
+    private static Vec2 Vec2Zero => new(0f, 0f);
 }

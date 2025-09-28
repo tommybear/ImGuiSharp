@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ImGuiSharp.Input;
+using ImGuiSharp.Math;
 
 namespace ImGuiSharp;
 
@@ -13,8 +14,7 @@ public sealed class ImGuiContext
     private readonly bool[] _mouseButtons = new bool[3];
     private readonly Dictionary<ImGuiKey, bool> _keyStates = new();
     private float _time;
-    private float _mousePosX;
-    private float _mousePosY;
+    private Vec2 _mousePosition = new(0f, 0f);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -95,12 +95,16 @@ public sealed class ImGuiContext
     /// </summary>
     /// <param name="x">The X coordinate in pixels.</param>
     /// <param name="y">The Y coordinate in pixels.</param>
-    public void SetMousePosition(float x, float y)
+    public void SetMousePosition(float x, float y) => SetMousePosition(new Vec2(x, y));
+
+    /// <summary>
+    /// Updates the tracked mouse position.
+    /// </summary>
+    /// <param name="position">Mouse position in pixels.</param>
+    public void SetMousePosition(in Vec2 position)
     {
-        _mousePosX = x;
-        _mousePosY = y;
-        IO.MousePositionX = x;
-        IO.MousePositionY = y;
+        _mousePosition = position;
+        IO.MousePosition = position;
     }
 
     /// <summary>
@@ -123,7 +127,7 @@ public sealed class ImGuiContext
     /// <summary>
     /// Returns a snapshot of the current mouse position and button states.
     /// </summary>
-    public ImGuiMouseStateSnapshot GetMouseState() => new(_mousePosX, _mousePosY, _mouseButtons);
+    public ImGuiMouseStateSnapshot GetMouseState() => new(_mousePosition, _mouseButtons);
 
     /// <summary>
     /// Updates the pressed state for the provided key.
