@@ -259,7 +259,7 @@ public sealed class ImGuiContext
 
     internal uint GetId(ReadOnlySpan<char> label)
     {
-        var seed = ImGuiId.FnvOffset;
+        uint seed = _windowStack.Count > 0 ? _windowStack.Peek().Id : ImGuiId.FnvOffset;
         foreach (var stackId in _idStack)
         {
             seed = ImGuiId.Combine(seed, stackId);
@@ -504,6 +504,7 @@ public sealed class ImGuiContext
         public Vec2 PrevCursorPos;
         public float ContentStartY;
         public bool IsChild;
+        public uint Id;
     }
 
     internal void BeginWindow(string name, in Vec2 pos, in Vec2 size, in Vec2 padding, bool isChild)
@@ -517,6 +518,9 @@ public sealed class ImGuiContext
             IsChild = isChild,
             PrevCursorPos = _cursorPos,
         };
+
+        var parentId = _windowStack.Count > 0 ? _windowStack.Peek().Id : ImGuiId.FnvOffset;
+        ws.Id = ImGuiId.Hash(name.AsSpan(), parentId);
 
         // Restore persistent scroll
         if (_windowScrollY.TryGetValue(name, out var persistedScroll))

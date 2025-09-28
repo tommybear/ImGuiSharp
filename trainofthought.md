@@ -46,3 +46,4 @@
 - 2025-09-28: Text: applied kerning via stbtt_GetCodepointKernAdvance (ASCII cache), improved ascent/line-height from font v-metrics, and added per-string width cache in context; updated ARCHITECTURE.md text pipeline notes.
 - 2025-09-28: Wrapped text + measurement aligned to Dear ImGui: added PushTextWrapPos/PopTextWrapPos, TextWrapped() (auto wrap at content width), and CalcTextSize(text, wrapWidth=-1, hideAfterDoubleHash=false) with tests.
 - 2025-09-28: Added VS Code debugging/tasks config under `.vscode.sample/` and documented how to use it in README/ARCHITECTURE.
+- 2025-09-28: Seeded item IDs with the current window scope (window hash + ID stack); added tests covering window-separated IDs and PushID; documented in ARCHITECTURE.md.

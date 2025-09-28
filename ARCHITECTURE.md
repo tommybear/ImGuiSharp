@@ -100,8 +100,9 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - Visuals: track + knob; label and formatted value are drawn near the slider.
 - No docking/tables/menus yet.
 - Fonts: ASCII subset baked by default; kerning and wider ranges will be added.
-- Window identity is name‑based; this will evolve to include the ID stack to
-  avoid collisions.
+- Window identity seeds item IDs: window IDs hash the window name combined with
+  the parent window’s ID. Item IDs include the current window ID + user ID stack
+  so identical labels in different windows do not collide.
 
 ## How To Add A New Widget
 
