@@ -36,4 +36,15 @@ public sealed class FrameLifecycleTests
         var exception = Assert.Throws<InvalidOperationException>(() => context.EndFrame());
         Assert.Contains("NewFrame", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void EndFrame_IncrementsFrameCount()
+    {
+        var context = new ImGuiContext();
+
+        context.NewFrame();
+        context.EndFrame();
+
+        Assert.Equal(1u, context.FrameCount);
+    }
 }

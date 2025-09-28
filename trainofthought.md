@@ -17,7 +17,7 @@
 5. Use the sample app and golden tests to anchor behaviour while iterating.
 
 ## Open Questions
-- Which existing managed bindings (Silk.NET, OpenTK) best balance ease of integration and maintenance?
+- How should the input event queue scale to support multiple contexts and platform backends without excessive copying?
 - Should the font atlas rely on stb ports or a managed alternative like SharpFont?
 - Do we target .NET 6 LTS or move to a newer runtime for span APIs and performance?
 
@@ -29,3 +29,4 @@
 ## Progress Log
 - 2024-05-17: Scaffolded ImGuiSharp solution with core library, Silk.NET renderer stub, sample app, and xUnit test project.
 - 2024-05-17: Replaced template stubs with `ImGuiContext`/`ImGuiIO`, defined rendering abstractions, added Silk.NET package reference, and seeded frame lifecycle tests.
+- 2024-05-17: Extended context with input queues and exposed ImGui static facade backed by unit tests.

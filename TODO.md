@@ -6,6 +6,7 @@
 - [ ] Add CI workflow for `dotnet build` and `dotnet test`.
 
 ## Core Library (ImGuiSharp)
+- [x] Seed `ImGuiContext` lifecycle, input queue, and static `ImGui` facade with tests.
 - [ ] Define public API surface mirroring Dear ImGui entry points (`ImGui`, `ImDrawList`, etc.).
 - [ ] Implement context and IO management (`ImGuiContext`, input queues, frame timing).
 - [ ] Port essential math primitives (`Vec2`, `Vec4`, `Color`, `Rect`, matrix helpers).

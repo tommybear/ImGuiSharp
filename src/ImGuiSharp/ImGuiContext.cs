@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using ImGuiSharp.Input;
 
 namespace ImGuiSharp;
 
@@ -7,6 +9,8 @@ namespace ImGuiSharp;
 /// </summary>
 public sealed class ImGuiContext
 {
+    private readonly List<IImGuiInputEvent> _inputEvents = new();
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
     /// </summary>
@@ -25,6 +29,11 @@ public sealed class ImGuiContext
     /// Gets a value indicating whether a frame is currently in progress.
     /// </summary>
     public bool IsFrameStarted { get; private set; }
+
+    /// <summary>
+    /// Gets the number of frames that have completed since the context was created.
+    /// </summary>
+    public uint FrameCount { get; private set; }
 
     /// <summary>
     /// Begins a new frame, preparing internal state for UI commands.
@@ -52,5 +61,32 @@ public sealed class ImGuiContext
         }
 
         IsFrameStarted = false;
+        FrameCount++;
+    }
+
+    /// <summary>
+    /// Enqueues an input event to be processed by the next frame.
+    /// </summary>
+    /// <param name="inputEvent">The input event to enqueue.</param>
+    public void AddInputEvent(IImGuiInputEvent inputEvent)
+    {
+        ArgumentNullException.ThrowIfNull(inputEvent);
+        _inputEvents.Add(inputEvent);
+    }
+
+    /// <summary>
+    /// Returns all queued input events and clears the internal buffer.
+    /// </summary>
+    /// <returns>A snapshot of queued input events.</returns>
+    public IReadOnlyList<IImGuiInputEvent> DrainInputEvents()
+    {
+        if (_inputEvents.Count == 0)
+        {
+            return Array.Empty<IImGuiInputEvent>();
+        }
+
+        var snapshot = _inputEvents.ToArray();
+        _inputEvents.Clear();
+        return snapshot;
     }
 }
