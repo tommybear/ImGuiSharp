@@ -29,6 +29,7 @@
 
 ## Sample Application
 - [ ] Create demo app showcasing windows, layout containers, and interactive widgets.
+  - [x] Hook sample window to Silk.NET pipeline with test triangle render.
 - [ ] Include comparison view replicating a subset of Dear ImGui demo windows.
 - [ ] Add automated UI script to exercise key interactions.
 

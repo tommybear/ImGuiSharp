@@ -6,4 +6,7 @@
     <ProjectReference Include="..\..\src\ImGuiSharp\ImGuiSharp.csproj" />
     <ProjectReference Include="..\..\src\ImGuiSharp.Rendering.SilkNet\ImGuiSharp.Rendering.SilkNet.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Silk.NET.Windowing" Version="2.22.0" />
+  </ItemGroup>
 </Project>
