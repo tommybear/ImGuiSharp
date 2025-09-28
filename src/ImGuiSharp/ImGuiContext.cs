@@ -32,6 +32,7 @@ public sealed class ImGuiContext
     private readonly Stack<WindowState> _windowStack = new();
     private readonly System.Collections.Generic.Dictionary<string, float> _windowScrollY = new();
     private readonly System.Collections.Generic.Dictionary<string, ScrollbarState> _windowScrollbar = new();
+    private readonly Stack<float> _wrapPosStack = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -452,6 +453,39 @@ public sealed class ImGuiContext
     public float GetLineHeight() => _fontAtlas?.LineHeight ?? 16f;
 
     public float GetAscent() => _fontAtlas?.Ascent ?? 12f;
+
+    internal void PushTextWrapPos(float wrapPosX)
+    {
+        _wrapPosStack.Push(wrapPosX);
+    }
+
+    internal void PopTextWrapPos()
+    {
+        if (_wrapPosStack.Count > 0)
+        {
+            _wrapPosStack.Pop();
+        }
+    }
+
+    internal bool HasTextWrapPos() => _wrapPosStack.Count > 0;
+
+    internal float GetContentRegionMaxX()
+    {
+        if (_windowStack.Count > 0)
+        {
+            var ws = _windowStack.Peek();
+            return ws.Pos.X + ws.Size.X - ws.Padding.X;
+        }
+        return IO.DisplaySize.X;
+    }
+
+    internal float ComputeWrapWidthForCurrentLine()
+    {
+        float wrapPosX = _wrapPosStack.Count > 0 ? _wrapPosStack.Peek() : 0f;
+        float targetX = wrapPosX <= 0f ? GetContentRegionMaxX() : wrapPosX;
+        float width = MathF.Max(1f, targetX - _cursorPos.X);
+        return width;
+    }
 
     private sealed class WindowState
     {

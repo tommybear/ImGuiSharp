@@ -50,6 +50,7 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - `MeasureTextWidth` applies kerning and caches per-string widths for reuse.
   - `ImGui.Text` renders at the current cursor and advances by line height;
     `ImGui.Label` renders absolute text without affecting the cursor.
+  - Wrapping: `PushTextWrapPos(wrapPosX)`/`PopTextWrapPos()` control wrapping; `wrapPosX == 0` wraps at the window’s content width. `ImGui.TextWrapped()` wraps using the current wrap position (auto if none set). `ImGui.CalcTextSize(text, wrapWidth=-1, hideAfterDoubleHash=false)` mirrors Dear ImGui semantics for measurement.
 
 ## Layout & scrolling
 

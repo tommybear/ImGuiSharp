@@ -305,6 +305,315 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Calculates the on-screen size of the given text without rendering it.
+    /// Supports optional wrapping and hiding after "##" to mirror Dear ImGui.
+    /// </summary>
+    public static Vec2 CalcTextSize(string text, float wrapWidth = -1f, bool hideAfterDoubleHash = false)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return Vec2.Zero;
+        }
+        if (hideAfterDoubleHash)
+        {
+            var idx = text.IndexOf("##", StringComparison.Ordinal);
+            if (idx >= 0) text = text.Substring(0, idx);
+        }
+
+        var ctx = GetCurrentContext();
+        var lineH = ctx.GetLineHeight();
+
+        if (wrapWidth <= 0f)
+        {
+            // No wrapping: account for embedded newlines only
+            float maxW = 0f;
+            int lines = 0;
+            int start = 0;
+            for (int i = 0; i <= text.Length; i++)
+            {
+                bool atEnd = i == text.Length;
+                if (atEnd || text[i] == '\n')
+                {
+                    var span = text.AsSpan(start, i - start).ToString();
+                    var w = ctx.MeasureTextWidth(span);
+                    if (w > maxW) maxW = w;
+                    lines++;
+                    start = i + 1;
+                }
+            }
+            if (lines == 0) lines = 1;
+            return new Vec2(maxW, lines * lineH);
+        }
+        else
+        {
+            // Greedy wrap to wrapWidth and measure
+            float maxLineW = 0f;
+            int totalLines = 0;
+            void MeasureLine(ReadOnlySpan<char> s)
+            {
+                var w = s.Length == 0 ? 0f : ctx.MeasureTextWidth(s.ToString());
+                if (w > maxLineW) maxLineW = w;
+                totalLines++;
+            }
+
+            int start = 0;
+            for (int i = 0; i <= text.Length; i++)
+            {
+                bool atEnd = i == text.Length;
+                if (!atEnd && text[i] != '\n') continue;
+                var raw = text.AsSpan(start, i - start);
+
+                if (raw.Length > 0 && ctx.MeasureTextWidth(raw.ToString()) <= wrapWidth)
+                {
+                    MeasureLine(raw);
+                }
+                else
+                {
+                    int tokenStart = 0;
+                    float curW = 0f;
+                    bool firstToken = true;
+                    int lineSegStart = 0;
+                    float spaceW = ctx.MeasureTextWidth(" ");
+                    for (int j = 0; j <= raw.Length; j++)
+                    {
+                        bool tokenEnd = j == raw.Length || raw[j] == ' ';
+                        if (!tokenEnd) continue;
+                        var token = raw.Slice(tokenStart, j - tokenStart);
+                        float tokenW = token.Length == 0 ? 0f : ctx.MeasureTextWidth(token.ToString());
+                        float sep = firstToken ? 0f : spaceW;
+                        if (curW + sep + tokenW <= wrapWidth || firstToken)
+                        {
+                            curW += sep + tokenW;
+                            firstToken = false;
+                        }
+                        else
+                        {
+                            // Measure accumulated segment
+                            var seg = raw.Slice(lineSegStart, tokenStart - lineSegStart);
+                            MeasureLine(seg);
+                            // New line
+                            lineSegStart = tokenStart;
+                            curW = tokenW;
+                            firstToken = false;
+
+                            if (tokenW > wrapWidth)
+                            {
+                                int cStart = tokenStart;
+                                float w = 0f;
+                                for (int c = tokenStart; c < tokenStart + token.Length; c++)
+                                {
+                                    var chSpan = raw.Slice(c, 1);
+                                    float cw = ctx.MeasureTextWidth(chSpan.ToString());
+                                    if (w + cw > wrapWidth && w > 0f)
+                                    {
+                                        var chunk = raw.Slice(cStart, c - cStart);
+                                        MeasureLine(chunk);
+                                        cStart = c;
+                                        w = 0f;
+                                    }
+                                    w += cw;
+                                }
+                                maxLineW = System.MathF.Max(maxLineW, w);
+                                lineSegStart = cStart;
+                            }
+                        }
+
+                        if (j < raw.Length && raw[j] == ' ')
+                        {
+                            j++;
+                            tokenStart = j;
+                        }
+                        else
+                        {
+                            tokenStart = j;
+                        }
+                    }
+
+                    if (lineSegStart < raw.Length)
+                    {
+                        var seg = raw.Slice(lineSegStart);
+                        MeasureLine(seg);
+                    }
+                    else if (raw.Length == 0)
+                    {
+                        MeasureLine(ReadOnlySpan<char>.Empty);
+                    }
+                }
+
+                start = i + 1;
+            }
+            if (totalLines == 0) totalLines = 1;
+            return new Vec2(MathF.Min(maxLineW, wrapWidth), totalLines * lineH);
+        }
+    }
+
+    /// <summary>
+    /// Renders text that wraps to the specified width using a greedy word-wrapping algorithm.
+    /// Advances the cursor by the total wrapped height.
+    /// </summary>
+    public static void TextWrapped(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var ctx = GetCurrentContext();
+        var cursor = ctx.CursorPos;
+        var lineH = ctx.GetLineHeight();
+        var ascent = ctx.GetAscent();
+
+        int totalLines = 0;
+
+        void EmitLine(ReadOnlySpan<char> s, int lineIndex)
+        {
+            if (s.Length == 0)
+            {
+                totalLines++;
+                return;
+            }
+            var baseline = new Vec2(cursor.X, cursor.Y + ascent + lineIndex * lineH);
+            ctx.AddText(baseline, s.ToString(), new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            totalLines++;
+        }
+
+        // Choose wrapping width from wrap stack or window content width
+        bool pushed = false;
+        if (!ctx.HasTextWrapPos())
+        {
+            ctx.PushTextWrapPos(0f); // auto wrap at content region max X
+            pushed = true;
+        }
+        float wrapWidth = ctx.ComputeWrapWidthForCurrentLine();
+
+        // Handle embedded newlines line-by-line
+        int start = 0;
+        int lineIndex = 0;
+        for (int i = 0; i <= text.Length; i++)
+        {
+            bool atEnd = i == text.Length;
+            if (!atEnd && text[i] != '\n')
+            {
+                continue;
+            }
+            var raw = text.AsSpan(start, i - start);
+
+            // Fast path: fits in one line
+            if (raw.Length > 0 && ctx.MeasureTextWidth(raw.ToString()) <= wrapWidth)
+            {
+                EmitLine(raw, lineIndex);
+                lineIndex++;
+            }
+            else
+            {
+                // Greedy wrap on spaces; fall back to character wrapping for long tokens
+                int tokenStart = 0;
+                float curW = 0f;
+                bool firstToken = true;
+                int lineSegStart = 0;
+                float spaceW = ctx.MeasureTextWidth(" ");
+                for (int j = 0; j <= raw.Length; j++)
+                {
+                    bool tokenEnd = j == raw.Length || raw[j] == ' ';
+                    if (!tokenEnd) continue;
+
+                    var token = raw.Slice(tokenStart, j - tokenStart);
+                    float tokenW = token.Length == 0 ? 0f : ctx.MeasureTextWidth(token.ToString());
+                    float sep = firstToken ? 0f : spaceW;
+                    if (curW + sep + tokenW <= wrapWidth || firstToken)
+                    {
+                        curW += sep + tokenW;
+                        firstToken = false;
+                    }
+                    else
+                    {
+                        // Emit the accumulated segment [lineSegStart..tokenStart)
+                        var seg = raw.Slice(lineSegStart, tokenStart - lineSegStart);
+                        EmitLine(seg, lineIndex);
+                        lineIndex++;
+                        // Start new line with current token
+                        lineSegStart = tokenStart;
+                        curW = tokenW;
+                        firstToken = false;
+
+                        // If single token longer than wrapWidth, break it by characters
+                        if (tokenW > wrapWidth)
+                        {
+                            int cStart = tokenStart;
+                            float w = 0f;
+                            for (int c = tokenStart; c < tokenStart + token.Length; c++)
+                            {
+                                var chSpan = raw.Slice(c, 1);
+                                float cw = ctx.MeasureTextWidth(chSpan.ToString());
+                                if (w + cw > wrapWidth && w > 0f)
+                                {
+                                    var chunk = raw.Slice(cStart, c - cStart);
+                                    EmitLine(chunk, lineIndex);
+                                    lineIndex++;
+                                    cStart = c;
+                                    w = 0f;
+                                }
+                                w += cw;
+                            }
+                            // Remainder of the long word becomes start of the next line
+                            curW = w;
+                            lineSegStart = cStart;
+                        }
+                    }
+
+                    // If this was a space, extend token past it and continue
+                    if (j < raw.Length && raw[j] == ' ')
+                    {
+                        j++; // consume space
+                        tokenStart = j;
+                    }
+                    else
+                    {
+                        tokenStart = j;
+                    }
+                }
+
+                // Emit last segment on this raw line
+                if (lineSegStart < raw.Length)
+                {
+                    var seg = raw.Slice(lineSegStart);
+                    EmitLine(seg, lineIndex);
+                    lineIndex++;
+                }
+                else if (raw.Length == 0)
+                {
+                    // preserve empty line
+                    EmitLine(ReadOnlySpan<char>.Empty, lineIndex);
+                    lineIndex++;
+                }
+            }
+
+            start = i + 1;
+        }
+
+        // Advance by the number of lines drawn
+        if (totalLines > 0)
+        {
+            ctx.AdvanceCursor(new Vec2(0f, totalLines * lineH));
+        }
+
+        if (pushed)
+        {
+            ctx.PopTextWrapPos();
+        }
+    }
+
+    /// <summary>
+    /// Pushes a text wrap position X in pixels. Pass 0 to wrap at the window content width.
+    /// </summary>
+    public static void PushTextWrapPos(float wrapPosX = 0f) => GetCurrentContext().PushTextWrapPos(wrapPosX);
+
+    /// <summary>
+    /// Pops the last text wrap position.
+    /// </summary>
+    public static void PopTextWrapPos() => GetCurrentContext().PopTextWrapPos();
+
+    /// <summary>
     /// Checkbox with a text label. Returns true if the value changed.
     /// </summary>
     public static bool Checkbox(string label, ref bool value)
