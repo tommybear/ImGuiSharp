@@ -218,6 +218,22 @@ public static class ImGui
         }
 
         context.AddRectFilled(rect, drawColor);
+        // Draw label text if default font is set
+        if (!string.IsNullOrEmpty(label))
+        {
+            var textWidth = context.MeasureTextWidth(label);
+            var fontLine = 16f; // fallback if no font
+            var atlasField = typeof(ImGuiContext).GetField("_fontAtlas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas atlas)
+            {
+                fontLine = atlas.LineHeight;
+            }
+            var textPos = new Vec2(
+                cursor.X + (actualSize.X - textWidth) * 0.5f,
+                cursor.Y + (actualSize.Y - fontLine) * 0.5f + (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas a ? a.Ascent : 0f));
+            context.AddText(textPos, label, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        }
+
         context.AdvanceCursor(actualSize);
         return pressed;
     }

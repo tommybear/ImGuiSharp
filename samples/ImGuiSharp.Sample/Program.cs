@@ -6,6 +6,7 @@ using ImGuiSharp.Math;
 using ImGuiSharp.Rendering;
 using ImGuiSharp.Rendering.SilkNet;
 using Silk.NET.Input;
+using ImGuiSharp.Fonts;
 using Silk.NET.OpenGL;
 using Silk.NET.Windowing;
 
@@ -55,6 +56,12 @@ window.Load += () =>
         keyboard.KeyUp += (_, key, _) => HandleKey(key, false);
         keyboard.KeyChar += (_, character) => ImGui.AddInputEvent(new ImGuiTextEvent(character));
     }
+
+    // Build font atlas from embedded Proggy Clean and upload to GL; set as default font
+    var fontBytes = ImGuiSharp.Fonts.EmbeddedProggyClean.GetBytes();
+    var atlas = ImGuiSharp.Fonts.FontAtlasBuilder.Build(fontBytes, 18f, 512, 512);
+    var handle = pipeline!.RegisterTexture(atlas.PixelsRgba, atlas.Width, atlas.Height);
+    context!.SetDefaultFont(atlas, (nint)handle);
 };
 
 window.Update += deltaTime =>

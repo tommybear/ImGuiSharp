@@ -48,6 +48,8 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
     private uint _shaderProgram;
     private int _projectionLocation;
     private uint _defaultTexture;
+    private readonly System.Collections.Generic.Dictionary<nint, uint> _textures = new();
+    private nint _nextTextureHandle = (nint)1;
 
     private int _vertexBufferCapacity;
     private int _indexBufferCapacity;
@@ -112,6 +114,7 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
         foreach (var list in drawData.DrawLists)
         {
             var commandIndexOffset = 0;
+            nint currentHandle = 0;
             foreach (var command in list.Commands)
             {
                 if (!ApplyClipRect(command.ClipRect, display))
@@ -124,6 +127,21 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
                 {
                     commandIndexOffset += command.ElementCount;
                     continue;
+                }
+
+                // Bind texture for this command
+                var handle = (nint)command.TextureId;
+                if (handle != currentHandle)
+                {
+                    if (handle == 0)
+                    {
+                        _gl.BindTexture(TextureTarget.Texture2D, _defaultTexture);
+                    }
+                    else if (_textures.TryGetValue(handle, out var tex))
+                    {
+                        _gl.BindTexture(TextureTarget.Texture2D, tex);
+                    }
+                    currentHandle = handle;
                 }
 
                 var indexPtr = (void*)((indexBase + commandIndexOffset) * sizeof(ushort));
@@ -373,6 +391,39 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
         if (_disposed)
         {
             throw new ObjectDisposedException(nameof(SilkNetRenderPipeline));
+        }
+    }
+
+    public nint RegisterTexture(ReadOnlySpan<byte> rgba, int width, int height)
+    {
+        ThrowIfDisposed();
+        var tex = _gl.GenTexture();
+        _gl.BindTexture(TextureTarget.Texture2D, tex);
+        unsafe
+        {
+            fixed (byte* p = rgba)
+            {
+                _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)width, (uint)height, 0,
+                    PixelFormat.Rgba, PixelType.UnsignedByte, p);
+            }
+        }
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Linear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.ClampToEdge);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.ClampToEdge);
+
+        var handle = _nextTextureHandle;
+        _nextTextureHandle = (nint)((long)_nextTextureHandle + 1);
+        _textures[handle] = tex;
+        return handle;
+    }
+
+    public void UnregisterTexture(nint handle)
+    {
+        ThrowIfDisposed();
+        if (_textures.Remove(handle, out var tex))
+        {
+            _gl.DeleteTexture(tex);
         }
     }
 }

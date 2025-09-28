@@ -12,6 +12,7 @@ internal sealed class ImGuiDrawListBuilder
     private readonly List<ImGuiVertex> _vertices = new();
     private readonly List<ushort> _indices = new();
     private readonly List<ImGuiDrawCommand> _commands = new();
+    private IntPtr _currentTexture = IntPtr.Zero;
 
     /// <summary>
     /// Resets the accumulated geometry.
@@ -54,7 +55,37 @@ internal sealed class ImGuiDrawListBuilder
         _indices.Add((ushort)(baseIndex + 2));
         _indices.Add((ushort)(baseIndex + 3));
 
-        _commands.Add(new ImGuiDrawCommand(6, rect, IntPtr.Zero));
+        _commands.Add(new ImGuiDrawCommand(6, rect, _currentTexture));
+    }
+
+    public void AddQuad(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, Color color)
+    {
+        if (_vertices.Count > ushort.MaxValue - 4)
+        {
+            throw new InvalidOperationException("Draw list exceeds maximum vertex count.");
+        }
+
+        var baseIndex = (ushort)_vertices.Count;
+
+        _vertices.Add(new ImGuiVertex(x0, y0, u0, v0, color.PackABGR()));
+        _vertices.Add(new ImGuiVertex(x1, y0, u1, v0, color.PackABGR()));
+        _vertices.Add(new ImGuiVertex(x1, y1, u1, v1, color.PackABGR()));
+        _vertices.Add(new ImGuiVertex(x0, y1, u0, v1, color.PackABGR()));
+
+        _indices.Add(baseIndex);
+        _indices.Add((ushort)(baseIndex + 1));
+        _indices.Add((ushort)(baseIndex + 2));
+        _indices.Add(baseIndex);
+        _indices.Add((ushort)(baseIndex + 2));
+        _indices.Add((ushort)(baseIndex + 3));
+
+        var clip = new ImGuiRect(x0, y0, x1, y1);
+        _commands.Add(new ImGuiDrawCommand(6, clip, _currentTexture));
+    }
+
+    public void SetTexture(IntPtr textureId)
+    {
+        _currentTexture = textureId;
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ImGuiSharp.Input;
 using ImGuiSharp.Math;
 using ImGuiSharp.Rendering;
+using ImGuiSharp.Fonts;
 
 namespace ImGuiSharp;
 
@@ -25,6 +26,8 @@ public sealed class ImGuiContext
     private Vec2 _cursorPos = Vec2.Zero;
     private float _pendingMouseWheelX;
     private float _pendingMouseWheelY;
+    private FontAtlas? _fontAtlas;
+    private IntPtr _fontTexture;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -291,6 +294,66 @@ public sealed class ImGuiContext
     internal void AddRectFilled(in ImGuiRect rect, Color color)
     {
         _drawListBuilder.AddRectFilled(rect, color);
+    }
+
+    internal void SetCurrentTexture(IntPtr textureId)
+    {
+        _drawListBuilder.SetTexture(textureId);
+    }
+
+    public void SetDefaultFont(FontAtlas atlas, IntPtr textureId)
+    {
+        _fontAtlas = atlas;
+        _fontTexture = textureId;
+    }
+
+    public float MeasureTextWidth(string text)
+    {
+        if (_fontAtlas is null || string.IsNullOrEmpty(text))
+        {
+            return 0f;
+        }
+        float w = 0f;
+        foreach (var ch in text)
+        {
+            if (_fontAtlas.Glyphs.TryGetValue(ch, out var g))
+            {
+                w += g.Advance;
+            }
+        }
+        return w;
+    }
+
+    internal void AddText(in Vec2 baselinePos, string text, Color color)
+    {
+        if (_fontAtlas is null || string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+        SetCurrentTexture(_fontTexture);
+        float x = baselinePos.X;
+        float y = baselinePos.Y;
+        foreach (var ch in text)
+        {
+            if (!_fontAtlas.Glyphs.TryGetValue(ch, out var g))
+            {
+                continue;
+            }
+
+            // Compute glyph rectangle in pixels from atlas UVs
+            // Width/height in pixels
+            float gw = (g.U1 - g.U0) * _fontAtlas.Width;
+            float gh = (g.V1 - g.V0) * _fontAtlas.Height;
+
+            float x0 = x + g.OffsetX;
+            float y0 = y + g.OffsetY;
+            float x1 = x0 + gw;
+            float y1 = y0 + gh;
+
+            _drawListBuilder.AddQuad(x0, y0, x1, y1, g.U0, g.V0, g.U1, g.V1, color);
+
+            x += g.Advance;
+        }
     }
 
     internal void AddMouseWheel(float wheelX, float wheelY)
