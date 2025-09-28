@@ -14,6 +14,16 @@ public sealed class ImGuiIO
     private Vec2 _mousePosition;
 
     /// <summary>
+    /// Gets or sets the vertical mouse wheel delta for the current frame.
+    /// </summary>
+    public float MouseWheel { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the horizontal mouse wheel delta for the current frame.
+    /// </summary>
+    public float MouseWheelH { get; internal set; }
+
+    /// <summary>
     /// Gets or sets the elapsed time between frames in seconds.
     /// </summary>
     public float DeltaTime { get; set; } = 1f / 60f;
@@ -55,6 +65,8 @@ public sealed class ImGuiIO
         _displaySize = new Vec2(1280f, 720f);
         Time = 0f;
         _mousePosition = Vec2Zero;
+        MouseWheel = 0f;
+        MouseWheelH = 0f;
         Array.Clear(_mouseButtons, 0, _mouseButtons.Length);
     }
 

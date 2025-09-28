@@ -47,6 +47,7 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
     private uint _fragmentShader;
     private uint _shaderProgram;
     private int _projectionLocation;
+    private uint _defaultTexture;
 
     private int _vertexBufferCapacity;
     private int _indexBufferCapacity;
@@ -75,6 +76,8 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
         _gl.Disable(GLEnum.CullFace);
         _gl.Disable(GLEnum.DepthTest);
         _gl.Enable(GLEnum.ScissorTest);
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        _gl.BindTexture(TextureTarget.Texture2D, _defaultTexture);
     }
 
     /// <inheritdoc />
@@ -157,6 +160,10 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
             _gl.DeleteProgram(_shaderProgram);
             _gl.DeleteShader(_vertexShader);
             _gl.DeleteShader(_fragmentShader);
+            if (_defaultTexture != 0)
+            {
+                _gl.DeleteTexture(_defaultTexture);
+            }
         }
 
         _disposed = true;
@@ -199,6 +206,24 @@ public sealed unsafe class SilkNetRenderPipeline : IRenderPipeline
 
         _gl.BindVertexArray(0);
         _resourcesCreated = true;
+
+        // Create a default 1x1 white texture to avoid sampling an unbound unit
+        _defaultTexture = _gl.GenTexture();
+        _gl.ActiveTexture(TextureUnit.Texture0);
+        _gl.BindTexture(TextureTarget.Texture2D, _defaultTexture);
+        Span<byte> pixel = stackalloc byte[] { 0xFF, 0xFF, 0xFF, 0xFF };
+        unsafe
+        {
+            fixed (byte* p = pixel)
+            {
+                _gl.TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, 1, 1, 0,
+                    PixelFormat.Rgba, PixelType.UnsignedByte, p);
+            }
+        }
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)GLEnum.Linear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)GLEnum.Linear);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)GLEnum.ClampToEdge);
+        _gl.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)GLEnum.ClampToEdge);
     }
 
     private uint CompileShader(ShaderType type, string source)

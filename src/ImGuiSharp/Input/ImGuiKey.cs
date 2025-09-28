@@ -68,5 +68,25 @@ public enum ImGuiKey
     /// <summary>
     /// A generic key slot for letter keys.
     /// </summary>
-    C
+    C,
+
+    // Navigation keys
+    Tab,
+    Backspace,
+    Left,
+    Right,
+    Up,
+    Down,
+
+    // Number row
+    D0,
+    D1,
+    D2,
+    D3,
+    D4,
+    D5,
+    D6,
+    D7,
+    D8,
+    D9
 }

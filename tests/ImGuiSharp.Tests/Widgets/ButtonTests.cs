@@ -108,4 +108,22 @@ public sealed class ButtonTests : IDisposable
 
         Assert.NotEqual(firstId, secondId);
     }
+    [Fact]
+    public void Button_SubmitsGeometry_ToDrawData()
+    {
+        var context = new ImGuiContext();
+        ImGui.SetCurrentContext(context);
+        ImGui.SetDisplaySize(new Vec2(400f, 300f));
+
+        context.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        ImGui.Button("Geom", new Vec2(120f, 40f));
+        context.EndFrame();
+
+        var drawData = ImGui.GetDrawData();
+        Assert.True(drawData.TotalVtxCount > 0);
+
+        ImGui.SetCurrentContext(null);
+    }
+
 }

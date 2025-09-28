@@ -146,6 +146,18 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Queues a mouse wheel delta for the active context.
+    /// </summary>
+    /// <param name="wheelX">Horizontal wheel delta.</param>
+    /// <param name="wheelY">Vertical wheel delta.</param>
+    public static void AddMouseWheel(float wheelX, float wheelY) => GetCurrentContext().AddMouseWheel(wheelX, wheelY);
+
+    /// <summary>
+    /// Retrieves the draw data generated during the last frame.
+    /// </summary>
+    public static ImGuiDrawData GetDrawData() => GetCurrentContext().GetDrawData();
+
+    /// <summary>
     /// Renders an interactive button and returns true when the button is clicked.
     /// </summary>
     /// <param name="label">Display label for the button.</param>
@@ -187,7 +199,27 @@ public static class ImGui
             }
         }
 
+        var normal = new Color(0.20f, 0.22f, 0.27f);
+        var hovered = new Color(0.28f, 0.30f, 0.36f);
+        var active = new Color(0.33f, 0.36f, 0.43f);
+
+        Color drawColor;
+        if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
+        {
+            drawColor = active;
+        }
+        else if (isHovered)
+        {
+            drawColor = hovered;
+        }
+        else
+        {
+            drawColor = normal;
+        }
+
+        context.AddRectFilled(rect, drawColor);
         context.AdvanceCursor(actualSize);
         return pressed;
     }
+
 }

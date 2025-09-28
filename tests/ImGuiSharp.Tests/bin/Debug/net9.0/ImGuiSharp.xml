@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ImGuiSharp</name>
+    </assembly>
+    <members>
+        <member name="T:ImGuiSharp.ImGuiContext">
+            <summary>
+            Represents the core runtime state for issuing immediate-mode UI commands.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.#ctor(ImGuiSharp.ImGuiIO)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.ImGuiContext"/> class.
+            </summary>
+            <param name="io">The IO configuration for the context. If null, a new instance is created.</param>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.IO">
+            <summary>
+            Gets the IO configuration associated with this context.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.IsFrameStarted">
+            <summary>
+            Gets a value indicating whether a frame is currently in progress.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.NewFrame">
+            <summary>
+            Begins a new frame, preparing internal state for UI commands.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when a frame is already in progress.</exception>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.EndFrame">
+            <summary>
+            Ends the current frame, finalizing draw command generation.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when no frame has been started.</exception>
+        </member>
+        <member name="T:ImGuiSharp.ImGuiIO">
+            <summary>
+            Holds per-frame input configuration consumed by ImGui during frame evaluation.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.DeltaTime">
+            <summary>
+            Gets or sets the elapsed time between frames in seconds.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.DisplayWidth">
+            <summary>
+            Gets or sets the logical width of the display surface in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.DisplayHeight">
+            <summary>
+            Gets or sets the logical height of the display surface in pixels.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiIO.Reset">
+            <summary>
+            Resets the per-frame input to defaults typically used for the first frame.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawCommand">
+            <summary>
+            Represents a single render command with its associated metadata.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawCommand.#ctor(System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawCommand"/> class.
+            </summary>
+            <param name="elementCount">Number of elements to draw.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawCommand.ElementCount">
+            <summary>
+            Gets the number of indices to draw for the command.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawData">
+            <summary>
+            Represents the draw data emitted by the core runtime for a single frame.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawData.#ctor(System.Collections.Generic.IReadOnlyList{ImGuiSharp.Rendering.ImGuiDrawList})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawData"/> class.
+            </summary>
+            <param name="drawLists">The draw lists that should be submitted to the renderer.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawData.DrawLists">
+            <summary>
+            Gets the draw lists composing the frame output.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawList">
+            <summary>
+            Represents a single draw list containing GPU-ready primitives.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawList.#ctor(System.Collections.Generic.IReadOnlyList{ImGuiSharp.Rendering.ImGuiDrawCommand})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawList"/> class.
+            </summary>
+            <param name="commands">The commands describing how to render the list.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.Commands">
+            <summary>
+            Gets the commands associated with this draw list.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.IRenderPipeline">
+            <summary>
+            Describes a rendering pipeline capable of translating ImGui draw data into GPU commands.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.BeginFrame">
+            <summary>
+            Prepares the pipeline for a new frame, ensuring underlying resources are ready.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.Render(ImGuiSharp.Rendering.ImGuiDrawData)">
+            <summary>
+            Submits draw data generated by the core library to the GPU.
+            </summary>
+            <param name="drawData">The draw data instance describing command lists to render.</param>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.EndFrame">
+            <summary>
+            Completes the frame, presenting results or flushing commands as required.
+            </summary>
+        </member>
+    </members>
+</doc>

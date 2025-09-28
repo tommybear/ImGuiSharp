@@ -18,10 +18,13 @@ public sealed class ImGuiContext
     private readonly bool[] _mouseButtonsPrev = new bool[3];
     private readonly Dictionary<ImGuiKey, bool> _keyStates = new();
     private readonly Stack<uint> _idStack = new();
+    private readonly ImGuiDrawListBuilder _drawListBuilder = new();
 
     private float _time;
     private Vec2 _mousePosition = Vec2.Zero;
     private Vec2 _cursorPos = Vec2.Zero;
+    private float _pendingMouseWheelX;
+    private float _pendingMouseWheelY;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -86,6 +89,11 @@ public sealed class ImGuiContext
         HoveredId = 0;
         LastItemId = 0;
         LastItemRect = default;
+        IO.MouseWheel = _pendingMouseWheelY;
+        IO.MouseWheelH = _pendingMouseWheelX;
+        _pendingMouseWheelX = 0f;
+        _pendingMouseWheelY = 0f;
+        _drawListBuilder.Reset();
         IsFrameStarted = true;
     }
 
@@ -280,6 +288,17 @@ public sealed class ImGuiContext
         ActiveId = 0;
     }
 
+    internal void AddRectFilled(in ImGuiRect rect, Color color)
+    {
+        _drawListBuilder.AddRectFilled(rect, color);
+    }
+
+    internal void AddMouseWheel(float wheelX, float wheelY)
+    {
+        _pendingMouseWheelX += wheelX;
+        _pendingMouseWheelY += wheelY;
+    }
+
     internal void RegisterItem(uint id, in ImGuiRect rect)
     {
         LastItemId = id;
@@ -318,5 +337,18 @@ public sealed class ImGuiContext
         }
 
         return !_mouseButtons[index] && _mouseButtonsPrev[index];
+    }
+
+    public ImGuiDrawData GetDrawData()
+    {
+        var displaySize = IO.DisplaySize;
+        var displayRect = new ImGuiRect(0f, 0f, displaySize.X, displaySize.Y);
+        var drawList = _drawListBuilder.Build();
+        if (drawList.Vertices.Length == 0 || drawList.Indices.Length == 0)
+        {
+            return new ImGuiDrawData(Array.Empty<ImGuiDrawList>(), displayRect);
+        }
+
+        return new ImGuiDrawData(new[] { drawList }, displayRect);
     }
 }

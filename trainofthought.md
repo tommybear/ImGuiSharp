@@ -36,3 +36,4 @@
 - 2024-05-17: Implemented button widget with ID stack, hover/active tracking, and unit tests.
 - 2024-05-17: Expanded Silk.NET backend with shader/VAO/VBO setup and buffer upload stubs.
 - 2024-05-17: Wired sample app to Silk.NET window loop to draw test triangle via render pipeline.
+- 2024-05-17: Routed Silk.NET mouse/keyboard events into ImGui context; sample now reacts to hover/click.

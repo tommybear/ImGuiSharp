@@ -1,0 +1,956 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ImGuiSharp</name>
+    </assembly>
+    <members>
+        <member name="T:ImGuiSharp.ImGui">
+            <summary>
+            Static entry point mirroring the traditional Dear ImGui API surface.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetCurrentContext(ImGuiSharp.ImGuiContext)">
+            <summary>
+            Sets the current context. Pass <c>null</c> to clear the active context.
+            </summary>
+            <param name="context">The context to make current.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetCurrentContext">
+            <summary>
+            Gets the current context or throws if none has been assigned.
+            </summary>
+            <returns>The active <see cref="T:ImGuiSharp.ImGuiContext"/>.</returns>
+            <exception cref="T:System.InvalidOperationException">Thrown when no context is active.</exception>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetIO">
+            <summary>
+            Provides direct access to the IO configuration of the active context.
+            </summary>
+            <returns>The IO object for the active context.</returns>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.NewFrame">
+            <summary>
+            Begins a new frame on the active context.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.EndFrame">
+            <summary>
+            Ends the current frame on the active context.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.UpdateDeltaTime(System.Single)">
+            <summary>
+            Updates the delta time for the active context.
+            </summary>
+            <param name="deltaSeconds">Elapsed time since the previous frame.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetTime">
+            <summary>
+            Gets the accumulated time since the context was created.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetDisplaySize(ImGuiSharp.Math.Vec2)">
+            <summary>
+            Sets the display size of the active context.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetDisplaySize">
+            <summary>
+            Gets the display size of the active context.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetMousePosition(System.Single,System.Single)">
+            <summary>
+            Sets the current mouse cursor position.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetMousePosition(ImGuiSharp.Math.Vec2)">
+            <summary>
+            Sets the current mouse cursor position.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetMouseButtonState(ImGuiSharp.Input.ImGuiMouseButton,System.Boolean)">
+            <summary>
+            Updates a mouse button state.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetMouseState">
+            <summary>
+            Gets the snapshot of the mouse state for the active context.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetKeyState(ImGuiSharp.Input.ImGuiKey,System.Boolean)">
+            <summary>
+            Updates the logical key state.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetKeyState">
+            <summary>
+            Gets a snapshot of the logical key state map.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.SetCursorPos(ImGuiSharp.Math.Vec2)">
+            <summary>
+            Sets the cursor position for the upcoming item.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetCursorPos">
+            <summary>
+            Gets the current cursor position.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.PushID(System.String)">
+            <summary>
+            Pushes an identifier onto the ID stack using a string seed.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.PushID(System.Int32)">
+            <summary>
+            Pushes an identifier onto the ID stack using an integer seed.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.PopID">
+            <summary>
+            Pops the most recently pushed ID from the stack.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.AddInputEvent(ImGuiSharp.Input.IImGuiInputEvent)">
+            <summary>
+            Queues an input event for the active context.
+            </summary>
+            <param name="inputEvent">The input event to enqueue.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.DrainInputEvents">
+            <summary>
+            Drains the queued input events from the active context.
+            </summary>
+            <returns>A snapshot of input events queued since the last drain.</returns>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.AddMouseWheel(System.Single,System.Single)">
+            <summary>
+            Queues a mouse wheel delta for the active context.
+            </summary>
+            <param name="wheelX">Horizontal wheel delta.</param>
+            <param name="wheelY">Vertical wheel delta.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.GetDrawData">
+            <summary>
+            Retrieves the draw data generated during the last frame.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGui.Button(System.String,System.Nullable{ImGuiSharp.Math.Vec2})">
+            <summary>
+            Renders an interactive button and returns true when the button is clicked.
+            </summary>
+            <param name="label">Display label for the button.</param>
+            <param name="size">Optional size. When omitted a default size is used.</param>
+        </member>
+        <member name="T:ImGuiSharp.ImGuiContext">
+            <summary>
+            Represents the core runtime state for issuing immediate-mode UI commands.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.#ctor(ImGuiSharp.ImGuiIO)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.ImGuiContext"/> class.
+            </summary>
+            <param name="io">The IO configuration for the context. If null, a new instance is created.</param>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.IO">
+            <summary>
+            Gets the IO configuration associated with this context.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.IsFrameStarted">
+            <summary>
+            Gets a value indicating whether a frame is currently in progress.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.FrameCount">
+            <summary>
+            Gets the number of frames that have completed since the context was created.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.ActiveId">
+            <summary>
+            Gets the ID of the item currently active (held by mouse button).
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.HoveredId">
+            <summary>
+            Gets the ID of the item most recently hovered this frame.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.LastItemId">
+            <summary>
+            Gets the ID of the most recently submitted item.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.LastItemRect">
+            <summary>
+            Gets the bounding rectangle of the most recently submitted item.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiContext.CursorPos">
+            <summary>
+            Gets the current cursor position used for automatic layout.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.NewFrame">
+            <summary>
+            Begins a new frame, preparing internal state for UI commands.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when a frame is already in progress.</exception>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.EndFrame">
+            <summary>
+            Ends the current frame, finalizing draw command generation.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">Thrown when no frame has been started.</exception>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.UpdateDeltaTime(System.Single)">
+            <summary>
+            Updates the delta time and accumulates total elapsed time.
+            </summary>
+            <param name="deltaSeconds">Elapsed time since the previous frame in seconds.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.GetTime">
+            <summary>
+            Gets the accumulated time since the context was created.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.SetMousePosition(System.Single,System.Single)">
+            <summary>
+            Updates the tracked mouse position.
+            </summary>
+            <param name="x">The X coordinate in pixels.</param>
+            <param name="y">The Y coordinate in pixels.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.SetMousePosition(ImGuiSharp.Math.Vec2@)">
+            <summary>
+            Updates the tracked mouse position.
+            </summary>
+            <param name="position">Mouse position in pixels.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.SetMouseButtonState(ImGuiSharp.Input.ImGuiMouseButton,System.Boolean)">
+            <summary>
+            Updates the pressed state for a specific mouse button.
+            </summary>
+            <param name="button">The button to update.</param>
+            <param name="isPressed">True when pressed, false when released.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.GetMouseState">
+            <summary>
+            Returns a snapshot of the current mouse position and button states.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.SetKeyState(ImGuiSharp.Input.ImGuiKey,System.Boolean)">
+            <summary>
+            Updates the pressed state for the provided key.
+            </summary>
+            <param name="key">The logical key.</param>
+            <param name="isPressed">True when pressed, false when released.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.GetKeyState">
+            <summary>
+            Returns a snapshot of the logical key state map.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.SetCursorPos(ImGuiSharp.Math.Vec2@)">
+            <summary>
+            Sets the cursor position explicitly.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.AdvanceCursor(ImGuiSharp.Math.Vec2@)">
+            <summary>
+            Advances the cursor position after an item of the given size.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.AddInputEvent(ImGuiSharp.Input.IImGuiInputEvent)">
+            <summary>
+            Enqueues an input event to be processed by the next frame.
+            </summary>
+            <param name="inputEvent">The input event to enqueue.</param>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.DrainInputEvents">
+            <summary>
+            Returns all queued input events and clears the internal buffer.
+            </summary>
+            <returns>A snapshot of queued input events.</returns>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiContext.GetId(System.String)">
+            <summary>
+            Computes an ID for the specified label, taking the ID stack into account.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.ImGuiIO">
+            <summary>
+            Holds per-frame input configuration consumed by ImGui during frame evaluation.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.MouseWheel">
+            <summary>
+            Gets or sets the vertical mouse wheel delta for the current frame.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.MouseWheelH">
+            <summary>
+            Gets or sets the horizontal mouse wheel delta for the current frame.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.DeltaTime">
+            <summary>
+            Gets or sets the elapsed time between frames in seconds.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.DisplaySize">
+            <summary>
+            Gets or sets the logical display size in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.Time">
+            <summary>
+            Gets or sets the accumulated time since the context was created.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.MousePosition">
+            <summary>
+            Gets or sets the current mouse position in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.ImGuiIO.MouseButtons">
+            <summary>
+            Gets a read-only view over the mouse button state array.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.ImGuiIO.Reset">
+            <summary>
+            Resets the per-frame input to defaults typically used for the first frame.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.IImGuiInputEvent">
+            <summary>
+            Marker interface representing an input event queued for processing by the UI runtime.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiKey">
+            <summary>
+            Represents keys recognised by the immediate-mode input system.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.Unknown">
+            <summary>
+            Unknown or unhandled key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.Enter">
+            <summary>
+            The Enter/Return key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.Escape">
+            <summary>
+            The Escape key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.Space">
+            <summary>
+            The Space bar.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.LeftCtrl">
+            <summary>
+            The left Control key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.RightCtrl">
+            <summary>
+            The right Control key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.LeftShift">
+            <summary>
+            The left Shift key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.RightShift">
+            <summary>
+            The right Shift key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.LeftAlt">
+            <summary>
+            The left Alt key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.RightAlt">
+            <summary>
+            The right Alt key.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.A">
+            <summary>
+            A generic key slot for letter keys.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.B">
+            <summary>
+            A generic key slot for letter keys.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiKey.C">
+            <summary>
+            A generic key slot for letter keys.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiKeyEvent">
+            <summary>
+            Represents a keyboard key state change.
+            </summary>
+            <param name="Key">The key that changed state.</param>
+            <param name="IsPressed">True when the key is pressed, false when released.</param>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiKeyEvent.#ctor(ImGuiSharp.Input.ImGuiKey,System.Boolean)">
+            <summary>
+            Represents a keyboard key state change.
+            </summary>
+            <param name="Key">The key that changed state.</param>
+            <param name="IsPressed">True when the key is pressed, false when released.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiKeyEvent.Key">
+            <summary>The key that changed state.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiKeyEvent.IsPressed">
+            <summary>True when the key is pressed, false when released.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiKeyStateSnapshot">
+            <summary>
+            Immutable snapshot of logical key states.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiKeyStateSnapshot.IsPressed(ImGuiSharp.Input.ImGuiKey)">
+            <summary>
+            Returns whether the specified key is currently considered pressed.
+            </summary>
+            <param name="key">The key to inspect.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiKeyStateSnapshot.PressedKeys">
+            <summary>
+            Enumerates keys that are currently pressed.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiMouseButton">
+            <summary>
+            Represents mouse buttons recognised by the immediate-mode input system.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiMouseButton.Left">
+            <summary>
+            The left mouse button.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiMouseButton.Right">
+            <summary>
+            The right mouse button.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Input.ImGuiMouseButton.Middle">
+            <summary>
+            The middle mouse button.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiMouseButtonEvent">
+            <summary>
+            Represents a mouse button state change.
+            </summary>
+            <param name="Button">The mouse button that changed state.</param>
+            <param name="IsPressed">True when the button is pressed, false when released.</param>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiMouseButtonEvent.#ctor(ImGuiSharp.Input.ImGuiMouseButton,System.Boolean)">
+            <summary>
+            Represents a mouse button state change.
+            </summary>
+            <param name="Button">The mouse button that changed state.</param>
+            <param name="IsPressed">True when the button is pressed, false when released.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseButtonEvent.Button">
+            <summary>The mouse button that changed state.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseButtonEvent.IsPressed">
+            <summary>True when the button is pressed, false when released.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiMousePositionEvent">
+            <summary>
+            Represents a pointer position update.
+            </summary>
+            <param name="X">The X coordinate in pixels.</param>
+            <param name="Y">The Y coordinate in pixels.</param>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiMousePositionEvent.#ctor(System.Single,System.Single)">
+            <summary>
+            Represents a pointer position update.
+            </summary>
+            <param name="X">The X coordinate in pixels.</param>
+            <param name="Y">The Y coordinate in pixels.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMousePositionEvent.X">
+            <summary>The X coordinate in pixels.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMousePositionEvent.Y">
+            <summary>The Y coordinate in pixels.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiMouseStateSnapshot">
+            <summary>
+            Immutable snapshot of mouse position and button states for the immediate-mode runtime.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseStateSnapshot.Position">
+            <summary>
+            Gets the mouse position in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseStateSnapshot.PositionX">
+            <summary>
+            Gets the X coordinate of the mouse cursor in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseStateSnapshot.PositionY">
+            <summary>
+            Gets the Y coordinate of the mouse cursor in pixels.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseStateSnapshot.Buttons">
+            <summary>
+            Gets a read-only view over the mouse button states.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiMouseStateSnapshot.IsPressed(ImGuiSharp.Input.ImGuiMouseButton)">
+            <summary>
+            Returns whether the specified button is currently pressed.
+            </summary>
+            <param name="button">The mouse button to inspect.</param>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiMouseWheelEvent">
+            <summary>
+            Represents a mouse wheel delta event.
+            </summary>
+            <param name="WheelX">Horizontal wheel delta.</param>
+            <param name="WheelY">Vertical wheel delta.</param>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiMouseWheelEvent.#ctor(System.Single,System.Single)">
+            <summary>
+            Represents a mouse wheel delta event.
+            </summary>
+            <param name="WheelX">Horizontal wheel delta.</param>
+            <param name="WheelY">Vertical wheel delta.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseWheelEvent.WheelX">
+            <summary>Horizontal wheel delta.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiMouseWheelEvent.WheelY">
+            <summary>Vertical wheel delta.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Input.ImGuiTextEvent">
+            <summary>
+            Represents a textual input event (UTF-16 code unit).
+            </summary>
+            <param name="Character">The character entered by the user.</param>
+        </member>
+        <member name="M:ImGuiSharp.Input.ImGuiTextEvent.#ctor(System.Char)">
+            <summary>
+            Represents a textual input event (UTF-16 code unit).
+            </summary>
+            <param name="Character">The character entered by the user.</param>
+        </member>
+        <member name="P:ImGuiSharp.Input.ImGuiTextEvent.Character">
+            <summary>The character entered by the user.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Math.Color">
+            <summary>
+            Represents an RGBA colour using 32-bit floats.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Color.#ctor(System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Math.Color"/> struct.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Color.R">
+            <summary>
+            Gets the red component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Color.G">
+            <summary>
+            Gets the green component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Color.B">
+            <summary>
+            Gets the blue component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Color.A">
+            <summary>
+            Gets the alpha component.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Color.PackABGR">
+            <summary>
+            Packs the colour into ABGR format (matching Dear ImGui).
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Color.FromABGR(System.UInt32)">
+            <summary>
+            Creates a colour from an ABGR-packed integer.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Color.ToVec4">
+            <summary>
+            Returns a <see cref="T:ImGuiSharp.Math.Vec4"/> view of this colour.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Math.Vec2">
+            <summary>
+            Minimal 2D vector implementation for UI layout calculations.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.#ctor(System.Single,System.Single)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Math.Vec2"/> struct.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.X">
+            <summary>
+            Gets the X component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.Y">
+            <summary>
+            Gets the Y component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.Zero">
+            <summary>
+            Gets a zero vector.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.One">
+            <summary>
+            Gets a vector of ones.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.LengthSquared">
+            <summary>
+            Gets the squared length of the vector.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec2.Length">
+            <summary>
+            Gets the length of the vector.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.op_Addition(ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Vec2)">
+            <summary>
+            Adds two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.op_Subtraction(ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Vec2)">
+            <summary>
+            Subtracts two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.op_Multiply(ImGuiSharp.Math.Vec2,System.Single)">
+            <summary>
+            Multiplies the vector by a scalar.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.op_Division(ImGuiSharp.Math.Vec2,System.Single)">
+            <summary>
+            Divides the vector by a scalar.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.Dot(ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Vec2)">
+            <summary>
+            Computes the dot product between two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.Lerp(ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Vec2,System.Single)">
+            <summary>
+            Linearly interpolates between two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.Equals(ImGuiSharp.Math.Vec2)">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec2.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:ImGuiSharp.Math.Vec4">
+            <summary>
+            Minimal 4D vector struct used for colours and layout operations.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.#ctor(System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Math.Vec4"/> struct.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec4.Zero">
+            <summary>
+            Gets a zero vector.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec4.X">
+            <summary>
+            Gets the X component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec4.Y">
+            <summary>
+            Gets the Y component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec4.Z">
+            <summary>
+            Gets the Z component.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Math.Vec4.W">
+            <summary>
+            Gets the W component.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.Lerp(ImGuiSharp.Math.Vec4,ImGuiSharp.Math.Vec4,System.Single)">
+            <summary>
+            Linearly interpolates between two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.op_Addition(ImGuiSharp.Math.Vec4,ImGuiSharp.Math.Vec4)">
+            <summary>
+            Adds two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.op_Subtraction(ImGuiSharp.Math.Vec4,ImGuiSharp.Math.Vec4)">
+            <summary>
+            Subtracts two vectors.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.op_Multiply(ImGuiSharp.Math.Vec4,System.Single)">
+            <summary>
+            Multiplies the vector by a scalar.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.Equals(ImGuiSharp.Math.Vec4)">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:ImGuiSharp.Math.Vec4.ToString">
+            <inheritdoc />
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawCommand">
+            <summary>
+            Represents a single render command with its associated metadata.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawCommand.#ctor(System.Int32,ImGuiSharp.Rendering.ImGuiRect,System.IntPtr)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawCommand"/> class.
+            </summary>
+            <param name="elementCount">Number of elements to draw.</param>
+            <param name="clipRect">Clipping rectangle applied to the draw call.</param>
+            <param name="textureId">Backend texture identifier.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawCommand.ElementCount">
+            <summary>
+            Gets the number of indices to draw for the command.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawCommand.ClipRect">
+            <summary>
+            Gets the clipping rectangle applied to the command.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawCommand.TextureId">
+            <summary>
+            Gets the renderer-specific texture identifier.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawData">
+            <summary>
+            Represents the draw data emitted by the core runtime for a single frame.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawData.#ctor(System.Collections.Generic.IReadOnlyList{ImGuiSharp.Rendering.ImGuiDrawList},ImGuiSharp.Rendering.ImGuiRect)">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawData"/> class.
+            </summary>
+            <param name="drawLists">The draw lists that should be submitted to the renderer.</param>
+            <param name="displayRect">The display rectangle covered by this frame.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawData.DrawLists">
+            <summary>
+            Gets the draw lists composing the frame output.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawData.DisplayRect">
+            <summary>
+            Gets the display rectangle covered by this draw data.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawData.TotalVtxCount">
+            <summary>
+            Gets the total vertex count across all draw lists.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawData.TotalIdxCount">
+            <summary>
+            Gets the total index count across all draw lists.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawList">
+            <summary>
+            Represents a single draw list containing GPU-ready primitives.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawList.#ctor(ImGuiSharp.Rendering.ImGuiVertex[],System.UInt16[],System.Collections.Generic.IReadOnlyList{ImGuiSharp.Rendering.ImGuiDrawCommand},System.Nullable{ImGuiSharp.Math.Vec2},System.Nullable{ImGuiSharp.Math.Vec2})">
+            <summary>
+            Initializes a new instance of the <see cref="T:ImGuiSharp.Rendering.ImGuiDrawList"/> class.
+            </summary>
+            <param name="vertices">The vertex buffer for the list.</param>
+            <param name="indices">The index buffer for the list.</param>
+            <param name="commands">The commands describing how to render the list.</param>
+            <param name="bufferPos">Origin offset for vertex coordinates.</param>
+            <param name="bufferScale">Scale applied to vertex coordinates.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.Vertices">
+            <summary>
+            Gets the vertex data for the draw list.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.Indices">
+            <summary>
+            Gets the index data for the draw list.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.Commands">
+            <summary>
+            Gets the commands associated with this draw list.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.BufferPos">
+            <summary>
+            Gets the vertex buffer origin offset.
+            </summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiDrawList.BufferScale">
+            <summary>
+            Gets the vertex buffer scale.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiDrawListBuilder">
+            <summary>
+            Utility to construct draw lists from immediate-mode primitives.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawListBuilder.Reset">
+            <summary>
+            Resets the accumulated geometry.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawListBuilder.AddRectFilled(ImGuiSharp.Rendering.ImGuiRect@,ImGuiSharp.Math.Color)">
+            <summary>
+            Adds a filled rectangle made of two triangles.
+            </summary>
+            <param name="rect">Rectangle bounds.</param>
+            <param name="color">Fill colour.</param>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiDrawListBuilder.Build">
+            <summary>
+            Builds an immutable draw list snapshot.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiRect">
+            <summary>
+            Represents an axis-aligned rectangle in screen space.
+            </summary>
+            <param name="MinX">Minimum X coordinate.</param>
+            <param name="MinY">Minimum Y coordinate.</param>
+            <param name="MaxX">Maximum X coordinate.</param>
+            <param name="MaxY">Maximum Y coordinate.</param>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiRect.#ctor(System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            Represents an axis-aligned rectangle in screen space.
+            </summary>
+            <param name="MinX">Minimum X coordinate.</param>
+            <param name="MinY">Minimum Y coordinate.</param>
+            <param name="MaxX">Maximum X coordinate.</param>
+            <param name="MaxY">Maximum Y coordinate.</param>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiRect.MinX">
+            <summary>Minimum X coordinate.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiRect.MinY">
+            <summary>Minimum Y coordinate.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiRect.MaxX">
+            <summary>Maximum X coordinate.</summary>
+        </member>
+        <member name="P:ImGuiSharp.Rendering.ImGuiRect.MaxY">
+            <summary>Maximum Y coordinate.</summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.ImGuiVertex">
+            <summary>
+            Represents a single vertex emitted by the UI renderer.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiVertex.#ctor(System.Single,System.Single,System.Single,System.Single,System.UInt32)">
+            <summary>
+            Represents a single vertex emitted by the UI renderer.
+            </summary>
+        </member>
+        <member name="F:ImGuiSharp.Rendering.ImGuiVertex.SizeInBytes">
+            <summary>
+            Gets the size in bytes of the vertex structure.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.ImGuiVertex.From(ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Vec2,ImGuiSharp.Math.Color)">
+            <summary>
+            Creates a vertex from vector position/uv and colour components.
+            </summary>
+        </member>
+        <member name="T:ImGuiSharp.Rendering.IRenderPipeline">
+            <summary>
+            Describes a rendering pipeline capable of translating ImGui draw data into GPU commands.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.BeginFrame">
+            <summary>
+            Prepares the pipeline for a new frame, ensuring underlying resources are ready.
+            </summary>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.Render(ImGuiSharp.Rendering.ImGuiDrawData)">
+            <summary>
+            Submits draw data generated by the core library to the GPU.
+            </summary>
+            <param name="drawData">The draw data instance describing command lists to render.</param>
+        </member>
+        <member name="M:ImGuiSharp.Rendering.IRenderPipeline.EndFrame">
+            <summary>
+            Completes the frame, presenting results or flushing commands as required.
+            </summary>
+        </member>
+    </members>
+</doc>
