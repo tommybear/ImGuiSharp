@@ -47,3 +47,4 @@
 - 2025-09-28: Wrapped text + measurement aligned to Dear ImGui: added PushTextWrapPos/PopTextWrapPos, TextWrapped() (auto wrap at content width), and CalcTextSize(text, wrapWidth=-1, hideAfterDoubleHash=false) with tests.
 - 2025-09-28: Added VS Code debugging/tasks config under `.vscode.sample/` and documented how to use it in README/ARCHITECTURE.
 - 2025-09-28: Seeded item IDs with the current window scope (window hash + ID stack); added tests covering window-separated IDs and PushID; documented in ARCHITECTURE.md.
+- 2025-09-28: Implemented Separator (draws 1px line, uses style spacing) and NewLine; added layout/draw tests and documented in README/ARCHITECTURE; TODO checklist updated.

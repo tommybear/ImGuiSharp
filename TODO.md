@@ -22,6 +22,7 @@
   - [x] Text + Label helpers using embedded font atlas.
   - [x] Checkbox (bool toggle with label) with unit tests.
   - [x] SliderFloat (drag to set value) with unit tests.
+  - [x] Separator & NewLine helpers with layout/draw tests.
 - [ ] Add style configuration and per-widget styling overrides.
 - [ ] Integrate font atlas generator and glyph rasterization pipeline.
   - [x] Embed Proggy Clean TTF; bake ASCII atlas via StbTrueTypeSharp.

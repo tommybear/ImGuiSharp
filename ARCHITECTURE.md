@@ -66,6 +66,10 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
 - Scrollbar
   - The thumb height is proportional to `visible/content` and its vertical
     position maps linearly to `ScrollY`. Dragging updates `ScrollY` while active.
+- Line helpers
+  - `ImGui.NewLine` advances the cursor by current line height + spacing.
+  - `ImGui.Separator` draws a 1px horizontal line across the content region and
+    advances the cursor with spacing above/below, mirroring Dear ImGui.
 
 ## Renderer backend (Silk.NET OpenGL)
 

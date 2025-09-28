@@ -307,6 +307,35 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Moves the cursor to the next line, vertically adding the current line height.
+    /// </summary>
+    public static void NewLine()
+    {
+        var ctx = GetCurrentContext();
+        ctx.AdvanceCursor(new Vec2(0f, ctx.GetLineHeight()));
+    }
+
+    /// <summary>
+    /// Adds a horizontal separator spanning the current content width.
+    /// </summary>
+    public static void Separator()
+    {
+        var ctx = GetCurrentContext();
+        var cursor = ctx.CursorPos;
+        var spacing = ctx.Style.ItemSpacing;
+        var lineHeight = ctx.GetLineHeight();
+        var y = cursor.Y + lineHeight * 0.5f;
+        var start = new Vec2(cursor.X, y);
+        var end = new Vec2(ctx.GetContentRegionMaxX(), y);
+
+        var thickness = 1f;
+        var rect = new ImGuiRect(start.X, y - thickness * 0.5f, end.X, y + thickness * 0.5f);
+        ctx.AddRectFilled(rect, new ImGuiSharp.Math.Color(0.43f, 0.43f, 0.50f, 1f));
+        ctx.RegisterItem(0, rect);
+        ctx.AdvanceCursor(new Vec2(0f, thickness + spacing.Y));
+    }
+
+    /// <summary>
     /// Calculates the on-screen size of the given text without rendering it.
     /// Supports optional wrapping and hiding after "##" to mirror Dear ImGui.
     /// </summary>
