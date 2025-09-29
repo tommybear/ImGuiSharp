@@ -16,6 +16,11 @@ public enum ImGuiKey
     Enter,
 
     /// <summary>
+    /// The numeric keypad Enter key.
+    /// </summary>
+    KeypadEnter,
+
+    /// <summary>
     /// The Escape key.
     /// </summary>
     Escape,
@@ -74,6 +79,8 @@ public enum ImGuiKey
     Tab,
     /// <summary>The Backspace key.</summary>
     Backspace,
+    /// <summary>The Delete key.</summary>
+    Delete,
     /// <summary>The Left arrow key.</summary>
     Left,
     /// <summary>The Right arrow key.</summary>

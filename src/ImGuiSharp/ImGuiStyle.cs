@@ -32,6 +32,7 @@ public sealed class ImGuiStyle
         SetColor(ImGuiCol.SliderGrab, new Color(0.34f, 0.36f, 0.43f, 1f));
         SetColor(ImGuiCol.SliderGrabActive, new Color(0.41f, 0.43f, 0.51f, 1f));
         SetColor(ImGuiCol.Border, new Color(0.19f, 0.19f, 0.20f, 0.5f));
+        SetColor(ImGuiCol.TextSelectedBg, new Color(0.26f, 0.59f, 0.98f, 0.35f));
         SetColor(ImGuiCol.NavHighlight, new Color(0.26f, 0.59f, 0.98f, 1f));
     }
 

@@ -23,6 +23,7 @@ public sealed class ImGuiContext
     private readonly Stack<StyleColorMod> _colorStack = new();
     private readonly Stack<StyleVarMod> _styleVarStack = new();
     private readonly ImGuiDrawListBuilder _drawListBuilder = new();
+    private readonly ImGuiInputTextState _inputTextState = new();
     private readonly List<uint> _focusableItems = new();
 
     private float _time;
@@ -57,6 +58,8 @@ public sealed class ImGuiContext
     /// Global style configuration (spacing, padding, etc.).
     /// </summary>
     public ImGuiStyle Style { get; }
+
+    internal ImGuiInputTextState InputTextState => _inputTextState;
 
     /// <summary>
     /// Gets a value indicating whether a frame is currently in progress.
@@ -417,6 +420,11 @@ public sealed class ImGuiContext
         ActiveId = id;
     }
 
+    internal void SetFocusId(uint id)
+    {
+        FocusedId = id;
+    }
+
     internal void ClearActiveId()
     {
         ActiveId = 0;
@@ -472,6 +480,18 @@ public sealed class ImGuiContext
             return cached;
         }
 
+        float w = MeasureTextWidth(text.AsSpan());
+        _textWidthCache[text] = w;
+        return w;
+    }
+
+    internal float MeasureTextWidth(ReadOnlySpan<char> text)
+    {
+        if (_fontAtlas is null || text.Length == 0)
+        {
+            return 0f;
+        }
+
         float w = 0f;
         char prev = '\0';
         foreach (var ch in text)
@@ -486,7 +506,7 @@ public sealed class ImGuiContext
                 prev = ch;
             }
         }
-        _textWidthCache[text] = w;
+
         return w;
     }
 

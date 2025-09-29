@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ImGuiSharp.Input;
 using ImGuiSharp.Math;
 using ImGuiSharp.Rendering;
+using SMath = System.Math;
 
 namespace ImGuiSharp;
 
@@ -888,6 +889,174 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Text input field. Returns true when the buffer changes or, if specified, when Enter is pressed.
+    /// </summary>
+    public static bool InputText(string label, ref string text, int maxLength = int.MaxValue, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None, Vec2? size = null)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+        ArgumentNullException.ThrowIfNull(text);
+
+        var context = GetCurrentContext();
+        var style = context.Style;
+        var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
+        var cursor = context.CursorPos;
+        var framePadding = style.FramePadding;
+        var lineHeight = context.GetLineHeight();
+
+        int actualMaxLength = maxLength <= 0 ? int.MaxValue : maxLength;
+        if (text.Length > actualMaxLength)
+        {
+            text = text.Substring(0, actualMaxLength);
+        }
+
+        float width = size?.X ?? MathF.Max(120f, context.MeasureTextWidth(text) + framePadding.X * 2f + 20f);
+        float height = size?.Y ?? (lineHeight + framePadding.Y * 2f);
+        var frameSize = new Vec2(width, height);
+        var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + frameSize.X, cursor.Y + frameSize.Y);
+        context.RegisterItem(id, rect);
+
+        var behavior = ButtonBehavior(context, rect, id);
+        var state = context.InputTextState;
+        bool selectAll = (flags & ImGuiInputTextFlags.AutoSelectAll) != 0;
+
+        if (behavior.Activated)
+        {
+            state.Activate(id, text, selectAll);
+            if (state.Text.Length > actualMaxLength)
+            {
+                state.SetText(state.Text.Substring(0, actualMaxLength));
+                text = state.Text;
+            }
+            context.SetActiveId(id);
+            context.MarkItemActive();
+            context.SetFocusId(id);
+        }
+
+        if (!state.IsActive && context.ActiveId == id)
+        {
+            state.Activate(id, text, selectAll);
+        }
+
+        bool valueChanged = false;
+        bool submit = false;
+        if (state.Id == id)
+        {
+            context.SetActiveId(id);
+            context.MarkItemActive();
+            context.SetFocusId(id);
+
+            var deactivateReason = InputTextDeactivateReason.None;
+            bool changed = ProcessInputText(context, state, flags, actualMaxLength, ref text, out deactivateReason, out submit);
+            if (changed)
+            {
+                valueChanged = true;
+            }
+
+            if (deactivateReason != InputTextDeactivateReason.None)
+            {
+                state.Deactivate();
+                context.ClearActiveId();
+                context.MarkItemReleased();
+                switch (deactivateReason)
+                {
+                    case InputTextDeactivateReason.Submit:
+                        context.SetFocusId(0);
+                        break;
+                    case InputTextDeactivateReason.Escape:
+                    case InputTextDeactivateReason.Tab:
+                        context.SetFocusId(0);
+                        break;
+                    default:
+                        context.SetFocusId(id);
+                        break;
+                }
+            }
+        }
+        else if (state.IsActive && state.Id == id)
+        {
+            state.Deactivate();
+        }
+
+        bool isActive = state.Id == id;
+        var displaySource = isActive ? state.Text : text;
+        string displayText = (flags & ImGuiInputTextFlags.Password) != 0
+            ? new string('*', displaySource.Length)
+            : displaySource;
+
+        float availableWidth = frameSize.X - framePadding.X * 2f;
+        float textBaseX = rect.MinX + framePadding.X;
+        float textBaseY = rect.MinY + framePadding.Y + context.GetAscent();
+
+        if (!isActive)
+        {
+            state.ScrollX = 0f;
+        }
+
+        int caretIndex = isActive ? SMath.Clamp(state.Cursor, 0, displaySource.Length) : displaySource.Length;
+        float cursorOffset = context.MeasureTextWidth(displayText.AsSpan(0, caretIndex));
+        if (isActive)
+        {
+            EnsureCursorVisible(state, MathF.Max(1f, availableWidth), cursorOffset);
+        }
+
+        var baseColor = style.GetColor(ImGuiCol.FrameBg);
+        var hoverColor = style.GetColor(ImGuiCol.FrameBgHovered);
+        var activeColor = style.GetColor(ImGuiCol.FrameBgActive);
+        var frameColor = context.ActiveId == id ? activeColor : (behavior.Hovered ? hoverColor : baseColor);
+        FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX - rect.MinX, rect.MaxY - rect.MinY), frameColor);
+
+        float textStartX = textBaseX - (isActive ? state.ScrollX : 0f);
+        var textColor = style.GetColor(ImGuiCol.Text);
+
+        if (isActive && state.HasSelection)
+        {
+            int selStart = SMath.Min(state.SelectionStart, state.SelectionEnd);
+            int selEnd = SMath.Max(state.SelectionStart, state.SelectionEnd);
+            selStart = SMath.Clamp(selStart, 0, displaySource.Length);
+            selEnd = SMath.Clamp(selEnd, 0, displaySource.Length);
+            float selStartX = textStartX + context.MeasureTextWidth(displayText.AsSpan(0, selStart));
+            float selEndX = textStartX + context.MeasureTextWidth(displayText.AsSpan(0, selEnd));
+            var selRect = new ImGuiRect(selStartX, rect.MinY + framePadding.Y, selEndX, rect.MaxY - framePadding.Y);
+            context.AddRectFilled(selRect, style.GetColor(ImGuiCol.TextSelectedBg));
+        }
+
+        if (!string.IsNullOrEmpty(displayText))
+        {
+            context.AddText(new Vec2(textStartX, textBaseY), displayText, textColor);
+        }
+        else if (!isActive && renderLabel.Length == 0)
+        {
+            // keep empty fields visible by drawing a zero-width string (no-op)
+        }
+
+        if (isActive)
+        {
+            double time = context.GetTime();
+            bool drawCaret = ((int)(time * 1.5f) & 1) == 0;
+            if (drawCaret)
+            {
+                float caretX = textStartX + cursorOffset;
+                var caretRect = new ImGuiRect(caretX, rect.MinY + framePadding.Y, caretX + 1f, rect.MaxY - framePadding.Y);
+                context.AddRectFilled(caretRect, textColor);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(renderLabel))
+        {
+            var labelPos = new Vec2(rect.MaxX + style.ItemSpacing.X, rect.MinY + context.GetAscent());
+            context.AddText(labelPos, renderLabel, style.GetColor(ImGuiCol.Text));
+        }
+
+        RenderNavHighlight(context, rect, id);
+        RenderFrameBorder(context, rect);
+
+        context.AdvanceCursor(new Vec2(0f, frameSize.Y));
+
+        return valueChanged || submit;
+    }
+
+    /// <summary>
     /// Radio button helper. Returns true when the selection changes.
     /// </summary>
     public static bool RadioButton(string label, ref int value, int option)
@@ -1039,6 +1208,186 @@ public static class ImGui
         return 0;
     }
 
+    private enum InputTextDeactivateReason
+    {
+        None,
+        Submit,
+        Escape,
+        Tab,
+        Other,
+    }
+
+    private static bool ProcessInputText(ImGuiContext context, ImGuiInputTextState state, ImGuiInputTextFlags flags, int maxLength, ref string text, out InputTextDeactivateReason deactivateReason, out bool submit)
+    {
+        deactivateReason = InputTextDeactivateReason.None;
+        submit = false;
+
+        bool readOnly = (flags & ImGuiInputTextFlags.ReadOnly) != 0;
+        bool changed = false;
+
+        var events = context.DrainInputEvents();
+        if (!readOnly)
+        {
+            foreach (var evt in events)
+            {
+                if (evt is ImGuiTextEvent textEvent)
+                {
+                    char c = textEvent.Character;
+                    if (c == '\r')
+                    {
+                        continue;
+                    }
+
+                    if ((flags & ImGuiInputTextFlags.CharsUppercase) != 0)
+                    {
+                        c = char.ToUpperInvariant(c);
+                    }
+
+                    if ((flags & ImGuiInputTextFlags.CharsNoBlank) != 0 && char.IsWhiteSpace(c))
+                    {
+                        continue;
+                    }
+
+                    if (c == '\t' && (flags & ImGuiInputTextFlags.AllowTabInput) == 0)
+                    {
+                        continue;
+                    }
+
+                    if (c == '\n')
+                    {
+                        continue;
+                    }
+
+                    if (state.InsertText(c.ToString(), maxLength))
+                    {
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        bool shift = context.IsKeyDown(ImGuiKey.LeftShift) || context.IsKeyDown(ImGuiKey.RightShift);
+        bool ctrl = context.IsKeyDown(ImGuiKey.LeftCtrl) || context.IsKeyDown(ImGuiKey.RightCtrl);
+
+        if (context.IsKeyJustPressed(ImGuiKey.Left))
+        {
+            int target = ctrl ? state.FindPrevWordBoundary(state.Cursor) : state.Cursor - 1;
+            state.MoveCursorTo(target, shift);
+        }
+        else if (context.IsKeyJustPressed(ImGuiKey.Right))
+        {
+            int target = ctrl ? state.FindNextWordBoundary(state.Cursor) : state.Cursor + 1;
+            state.MoveCursorTo(target, shift);
+        }
+        else if (context.IsKeyJustPressed(ImGuiKey.Home))
+        {
+            state.MoveCursorTo(0, shift);
+        }
+        else if (context.IsKeyJustPressed(ImGuiKey.End))
+        {
+            state.MoveCursorTo(state.Text.Length, shift);
+        }
+
+        if (!readOnly)
+        {
+            if (context.IsKeyJustPressed(ImGuiKey.Backspace))
+            {
+                if (state.DeleteBackspace(ctrl))
+                {
+                    changed = true;
+                }
+            }
+
+            if (context.IsKeyJustPressed(ImGuiKey.Delete))
+            {
+                if (state.DeleteForward(ctrl))
+                {
+                    changed = true;
+                }
+            }
+        }
+
+        if (ctrl && context.IsKeyJustPressed(ImGuiKey.A))
+        {
+            state.SelectAll();
+        }
+
+        if (context.IsKeyJustPressed(ImGuiKey.Tab))
+        {
+            if ((flags & ImGuiInputTextFlags.AllowTabInput) != 0 && !readOnly)
+            {
+                if (state.InsertText("\t", maxLength))
+                {
+                    changed = true;
+                }
+            }
+            else
+            {
+                deactivateReason = InputTextDeactivateReason.Tab;
+            }
+        }
+
+        bool escapePressed = context.IsKeyJustPressed(ImGuiKey.Escape);
+        if (escapePressed)
+        {
+            if (!readOnly && text != state.InitialText)
+            {
+                text = state.InitialText;
+                state.SetText(text);
+                state.MoveCursorTo(text.Length, false);
+                changed = false;
+            }
+
+            deactivateReason = InputTextDeactivateReason.Escape;
+        }
+
+        bool enterPressed = context.IsKeyJustPressed(ImGuiKey.Enter) || context.IsKeyJustPressed(ImGuiKey.KeypadEnter);
+        if (enterPressed && (flags & ImGuiInputTextFlags.EnterReturnsTrue) != 0)
+        {
+            submit = true;
+            deactivateReason = InputTextDeactivateReason.Submit;
+        }
+
+        if (changed)
+        {
+            string newText = state.Text;
+            if (newText.Length > maxLength)
+            {
+                newText = newText.Substring(0, maxLength);
+                state.SetText(newText);
+                state.MoveCursorTo(newText.Length, false);
+            }
+
+            if (newText != text)
+            {
+                text = newText;
+                context.MarkItemEdited();
+            }
+            else
+            {
+                changed = false;
+            }
+        }
+
+        return changed;
+    }
+
+    private static void EnsureCursorVisible(ImGuiInputTextState state, float availableWidth, float cursorOffset)
+    {
+        if (cursorOffset - state.ScrollX > availableWidth)
+        {
+            state.ScrollX = cursorOffset - availableWidth;
+        }
+        if (cursorOffset - state.ScrollX < 0f)
+        {
+            state.ScrollX = cursorOffset;
+        }
+        if (state.ScrollX < 0f)
+        {
+            state.ScrollX = 0f;
+        }
+    }
+
     private readonly struct ButtonBehaviorResult
     {
         public ButtonBehaviorResult(bool hovered, bool held, bool pressed, bool released, bool activated)
@@ -1099,6 +1448,7 @@ public static class ImGui
             }
         }
 
+        context.UpdateItemStatusFlags(hovered, held, pressed, released, context.FocusedId == id);
         return new ButtonBehaviorResult(hovered, held, pressed, released, activated);
     }
 

@@ -24,6 +24,7 @@
   - [x] RadioButton (option selection) using style palette with unit tests.
   - [x] SliderFloat (drag to set value) with unit tests.
   - [x] Separator/NewLine/SeparatorText helpers with layout/draw tests.
+  - [x] InputText (single line) with editing, selection, and unit tests.
 - [ ] Add style configuration and per-widget styling overrides.
 - [ ] Integrate font atlas generator and glyph rasterization pipeline.
   - [x] Embed Proggy Clean TTF; bake ASCII atlas via StbTrueTypeSharp.

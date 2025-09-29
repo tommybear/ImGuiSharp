@@ -136,6 +136,13 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
     slider body.
   - Keyboard: default step is `(max-min)/100`; `Shift` multiplies by 10,
     `Ctrl` divides by 10. An optional explicit step overrides the base step.
+- InputText
+  - Activation copies the bound string into an editing state tracking cursor,
+    selection, and scroll. Supports `AutoSelectAll`, `EnterReturnsTrue`,
+    `AllowTabInput`, and character filtering flags.
+  - While active it consumes queued text events, handles arrow/Home/End navigation,
+    renders selection highlights and a blinking caret, and pushes changes back to
+    the caller on every edit.
 - No docking/tables/menus yet.
 - Fonts: ASCII subset baked by default; kerning and wider ranges will be added.
 - Window identity seeds item IDs: window IDs hash the window name combined with

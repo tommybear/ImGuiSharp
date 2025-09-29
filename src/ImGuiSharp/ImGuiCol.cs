@@ -31,6 +31,8 @@ public enum ImGuiCol
     SliderGrabActive,
     /// <summary>Frame/window border colour.</summary>
     Border,
+    /// <summary>Background colour for selected text.</summary>
+    TextSelectedBg,
     /// <summary>Navigation/focus highlight colour.</summary>
     NavHighlight,
     /// <summary>Total number of style colour slots.</summary>
