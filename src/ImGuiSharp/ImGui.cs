@@ -1105,6 +1105,7 @@ public static class ImGui
         GetCurrentContext().EndWindow();
     }
 
+    /// <summary>Returns true when the most recently submitted item is hovered by the mouse.</summary>
     public static bool IsItemHovered()
     {
         var ctx = GetCurrentContext();
@@ -1115,6 +1116,7 @@ public static class ImGui
         return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Hovered) != 0;
     }
 
+    /// <summary>Returns true when the most recently submitted item is active (held).</summary>
     public static bool IsItemActive()
     {
         var ctx = GetCurrentContext();
@@ -1125,6 +1127,7 @@ public static class ImGui
         return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Active) != 0;
     }
 
+    /// <summary>Returns true when the most recently submitted item owns keyboard focus.</summary>
     public static bool IsItemFocused()
     {
         var ctx = GetCurrentContext();
@@ -1135,6 +1138,7 @@ public static class ImGui
         return ctx.LastItemId == ctx.FocusedId;
     }
 
+    /// <summary>Returns true when the most recently submitted item was clicked with the specified button.</summary>
     public static bool IsItemClicked(ImGuiMouseButton button = ImGuiMouseButton.Left)
     {
         var ctx = GetCurrentContext();
@@ -1151,6 +1155,9 @@ public static class ImGui
         return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Released) != 0;
     }
 
+    /// <summary>
+    /// Returns true when the last item was deactivated (released or lost focus) this frame.
+    /// </summary>
     public static bool IsItemDeactivated()
     {
         var ctx = GetCurrentContext();
@@ -1162,6 +1169,10 @@ public static class ImGui
         return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Deactivated) != 0;
     }
 
+    /// <summary>
+    /// Returns true when the last item was deactivated and modified in the same frame.
+    /// Mirrors Dear ImGui's IsItemDeactivatedAfterEdit.
+    /// </summary>
     public static bool IsItemDeactivatedAfterEdit()
     {
         var ctx = GetCurrentContext();

@@ -32,12 +32,10 @@ IKeyboard? keyboard = null;
 var toggle = false;
 var mousePosition = new Vec2(-100f, -100f);
 var mouseScroll = new Vec2(0f, 0f);
-float scrollY = 0f;
 bool[] demoChecks = Enumerable.Repeat(false, 32).ToArray();
 float[] demoValues = Enumerable.Repeat(0.5f, 32).ToArray();
 int mode = 0;
 
-static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
 
 window.Load += () =>

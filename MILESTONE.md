@@ -14,7 +14,7 @@
 - Implement primary widgets (text, buttons, basic inputs) and window/layout system.
 - Finish clipping, scrolling, child windows, and style overrides.
 - Add golden tests for layout scenarios and widget interactions.
-- Status: text/label + buttons complete; child windows with wheel scrolling and basic draggable scrollbar implemented; Checkbox and SliderFloat added with tests.
+- Status: text/label + buttons complete; child windows with wheel scrolling and basic draggable scrollbar implemented; Checkbox/RadioButton/SliderFloat present with tests; item query API mirrors Dear ImGui.
 
 ## Milestone 3 – Rendering Backend (Weeks 10-13)
 - Finalise renderer abstraction and complete the reference OpenGL backend.

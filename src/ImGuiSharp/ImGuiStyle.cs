@@ -2,6 +2,9 @@ using ImGuiSharp.Math;
 
 namespace ImGuiSharp;
 
+/// <summary>
+/// Encapsulates layout spacing, padding, text alignment, and colour palette used by widgets.
+/// </summary>
 public sealed class ImGuiStyle
 {
     private readonly Color[] _colors = new Color[(int)ImGuiCol.Count];

@@ -89,10 +89,13 @@ public sealed class ImGuiContext
     /// </summary>
     public ImGuiItemStatusFlags LastItemStatusFlags { get; private set; }
 
+    /// <summary>Gets the mouse button that most recently pressed the last item.</summary>
     public ImGuiMouseButton LastItemPressedButton { get; private set; }
 
+    /// <summary>Gets the ID of the item considered focused for navigation.</summary>
     public uint FocusedId { get; private set; }
 
+    /// <summary>Gets the frame index when the last item was edited.</summary>
     public uint LastItemEditedFrame { get; private set; }
 
     /// <summary>
@@ -342,6 +345,7 @@ public sealed class ImGuiContext
         _drawListBuilder.PopClipRect();
     }
 
+    /// <summary>Sets the default font atlas and associated texture ID.</summary>
     public void SetDefaultFont(FontAtlas atlas, IntPtr textureId)
     {
         _fontAtlas = atlas;
@@ -349,6 +353,7 @@ public sealed class ImGuiContext
         _textWidthCache.Clear();
     }
 
+    /// <summary>Measures the width of the provided text string using the default font.</summary>
     public float MeasureTextWidth(string text)
     {
         if (_fontAtlas is null || string.IsNullOrEmpty(text))
@@ -508,6 +513,7 @@ public sealed class ImGuiContext
         return !_mouseButtons[index] && _mouseButtonsPrev[index];
     }
 
+    /// <summary>Builds draw data for the current frame.</summary>
     public ImGuiDrawData GetDrawData()
     {
         var displaySize = IO.DisplaySize;
@@ -521,8 +527,10 @@ public sealed class ImGuiContext
         return new ImGuiDrawData(new[] { drawList }, displayRect);
     }
 
+    /// <summary>Gets the current font line height.</summary>
     public float GetLineHeight() => _fontAtlas?.LineHeight ?? 16f;
 
+    /// <summary>Gets the current font ascent (baseline offset).</summary>
     public float GetAscent() => _fontAtlas?.Ascent ?? 12f;
 
     internal void PushTextWrapPos(float wrapPosX)
