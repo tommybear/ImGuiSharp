@@ -853,15 +853,22 @@ public static class ImGui
         }
 
         // Draw track and knob
-        var trackCol = style.GetColor(ImGuiCol.FrameBg);
-        var knobBase = style.GetColor(ImGuiCol.Button);
-        var knobHovered = style.GetColor(ImGuiCol.ButtonHovered);
-        var knobActive = style.GetColor(ImGuiCol.ButtonActive);
+        var trackBase = style.GetColor(ImGuiCol.FrameBg);
+        var trackHover = style.GetColor(ImGuiCol.FrameBgHovered);
+        var trackActive = style.GetColor(ImGuiCol.FrameBgActive);
+        var knobBase = style.GetColor(ImGuiCol.SliderGrab);
+        var knobActive = style.GetColor(ImGuiCol.SliderGrabActive);
         var textColor = style.GetColor(ImGuiCol.Text);
+
+        var trackCol = context.ActiveId == id ? trackActive : (hovered ? trackHover : trackBase);
         FillRect(new Vec2(rect.MinX, rect.MinY + (sz.Y - 8f) * 0.5f), new Vec2(sz.X, 8f), trackCol);
         var tknob = (value - min) / MathF.Max(0.0001f, (max - min));
         var knobX = rect.MinX + 6f + tknob * MathF.Max(1f, (sz.X - 12f));
-        var knobCol = (context.ActiveId == id) ? knobActive : (hovered ? knobHovered : knobBase);
+        var knobCol = (context.ActiveId == id) ? knobActive : knobBase;
+        if (hovered && context.ActiveId != id)
+        {
+            knobCol = knobActive;
+        }
         FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), knobCol);
 
         // Label & value text
@@ -876,6 +883,69 @@ public static class ImGui
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
         return changed || released; // true when value changed this frame or on commit
+    }
+
+    /// <summary>
+    /// Radio button helper. Returns true when the selection changes.
+    /// </summary>
+    public static bool RadioButton(string label, ref int value, int option)
+    {
+        var context = GetCurrentContext();
+        var style = context.Style;
+        var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
+        var cursor = context.CursorPos;
+        var lineH = context.GetLineHeight();
+        float radius = MathF.Min(lineH * 0.5f, 7f);
+        var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + radius * 2f, cursor.Y + radius * 2f);
+        context.RegisterItem(id, rect);
+
+        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        if (hovered)
+        {
+            context.SetHoveredId(id);
+        }
+
+        bool changed = false;
+        bool selected = value == option;
+        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
+        {
+            context.SetActiveId(id);
+        }
+        if (context.ActiveId == id)
+        {
+            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
+            {
+                if (hovered && !selected)
+                {
+                    value = option;
+                    selected = true;
+                    changed = true;
+                }
+                context.ClearActiveId();
+            }
+        }
+
+        var baseCol = style.GetColor(ImGuiCol.FrameBg);
+        var hoverCol = style.GetColor(ImGuiCol.FrameBgHovered);
+        var activeCol = style.GetColor(ImGuiCol.FrameBgActive);
+        var markCol = style.GetColor(ImGuiCol.CheckMark);
+        var drawColor = context.ActiveId == id ? activeCol : (hovered ? hoverCol : baseCol);
+        var center = new Vec2(cursor.X + radius, cursor.Y + radius);
+        context.AddCircleFilled(center, radius, drawColor, 16);
+        if (selected)
+        {
+            context.AddCircleFilled(center, MathF.Max(1f, radius * 0.45f), markCol, 12);
+        }
+
+        if (!string.IsNullOrEmpty(renderLabel))
+        {
+            var baseline = new Vec2(rect.MaxX + style.ItemSpacing.X, cursor.Y + context.GetAscent());
+            context.AddText(baseline, renderLabel, style.GetColor(ImGuiCol.Text));
+        }
+
+        context.AdvanceCursor(new Vec2(0f, lineH));
+        return changed;
     }
 
     private static string GetRenderedLabel(string label)

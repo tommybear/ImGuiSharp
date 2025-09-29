@@ -1,4 +1,5 @@
 using ImGuiSharp;
+using ImGuiSharp.Input;
 using ImGuiSharp.Math;
 using Xunit;
 
@@ -86,6 +87,52 @@ public sealed class StyleIntegrationTests
 
         var expectedSliderHeight = MathF.Max(18f, ctx.GetLineHeight() + ctx.Style.FramePadding.Y * 2f);
         Assert.Equal(expectedSliderHeight, sliderRect.MaxY - sliderRect.MinY, 1);
+
+        ImGui.SetCurrentContext(null);
+    }
+
+    [Fact]
+    public void Slider_UsesGrabColors()
+    {
+        var ctx = new ImGuiContext();
+        ImGui.SetCurrentContext(ctx);
+        ImGui.SetDisplaySize(new Vec2(400, 200));
+
+        var grab = new Color(0.2f, 0.6f, 0.3f, 1f);
+        var grabActive = new Color(0.8f, 0.2f, 0.4f, 1f);
+        ctx.Style.SetColor(ImGuiCol.SliderGrab, grab);
+        ctx.Style.SetColor(ImGuiCol.SliderGrabActive, grabActive);
+
+        float value = 0.5f;
+        ctx.SetMousePosition(new Vec2(1000f, 1000f));
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        ImGui.SliderFloat("S", ref value, 0f, 1f, new Vec2(200f, 20f));
+        ctx.EndFrame();
+
+        var drawData = ImGui.GetDrawData();
+        var list = drawData.DrawLists[0];
+        var verts = list.Vertices.Span;
+        Assert.True(verts.Length >= 8);
+        Assert.Equal(grab.PackABGR(), verts[4].Color);
+
+        // Activate slider with click to ensure active color used
+        ctx.SetMousePosition(new Vec2(5f, 5f));
+        ctx.SetMouseButtonState(ImGuiMouseButton.Left, true);
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        ImGui.SliderFloat("S", ref value, 0f, 1f, new Vec2(200f, 20f));
+        ctx.EndFrame();
+
+        ctx.SetMouseButtonState(ImGuiMouseButton.Left, false);
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        ImGui.SliderFloat("S", ref value, 0f, 1f, new Vec2(200f, 20f));
+        ctx.EndFrame();
+
+        drawData = ImGui.GetDrawData();
+        verts = drawData.DrawLists[0].Vertices.Span;
+        Assert.Equal(grabActive.PackABGR(), verts[4].Color);
 
         ImGui.SetCurrentContext(null);
     }

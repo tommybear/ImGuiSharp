@@ -87,6 +87,45 @@ internal sealed class ImGuiDrawListBuilder
         _commands.Add(new ImGuiDrawCommand(6, clip, _currentTexture));
     }
 
+    public void AddCircleFilled(Vec2 center, float radius, Color color, int segments = 12)
+    {
+        if (radius <= 0f)
+        {
+            return;
+        }
+
+        segments = System.Math.Clamp(segments, 3, 64);
+
+        if (_vertices.Count > ushort.MaxValue - (segments + 2))
+        {
+            throw new InvalidOperationException("Draw list exceeds maximum vertex count.");
+        }
+
+        var centerIndex = (ushort)_vertices.Count;
+        _vertices.Add(ImGuiVertex.From(center, Vec2.Zero, color));
+
+        var angleStep = (float)(System.Math.PI * 2.0 / segments);
+        for (int i = 0; i <= segments; i++)
+        {
+            var angle = angleStep * i;
+            var x = center.X + System.MathF.Cos(angle) * radius;
+            var y = center.Y + System.MathF.Sin(angle) * radius;
+            _vertices.Add(ImGuiVertex.From(new Vec2(x, y), Vec2.Zero, color));
+        }
+
+        for (int i = 0; i < segments; i++)
+        {
+            _indices.Add(centerIndex);
+            _indices.Add((ushort)(centerIndex + i + 1));
+            _indices.Add((ushort)(centerIndex + i + 2));
+        }
+
+        var clipRect = _hasClip
+            ? _clipRect
+            : new ImGuiRect(center.X - radius, center.Y - radius, center.X + radius, center.Y + radius);
+        _commands.Add(new ImGuiDrawCommand(segments * 3, clipRect, IntPtr.Zero));
+    }
+
     public void SetTexture(IntPtr textureId)
     {
         _currentTexture = textureId;

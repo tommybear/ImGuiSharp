@@ -49,3 +49,4 @@
 - 2025-09-28: Seeded item IDs with the current window scope (window hash + ID stack); added tests covering window-separated IDs and PushID; documented in ARCHITECTURE.md.
 - 2025-09-28: Implemented Separator (draws 1px line, uses style spacing), NewLine, and SeparatorText; extended sample to showcase labeled separators; added tests and docs; TODO checklist updated.
 - 2025-09-28: SliderFloat keyboard parity: added optional step parameter, Shift/Ctrl modifiers (x10, /10) mirroring Dear ImGui; expanded tests for modifiers and explicit steps; documentation updated.
+- 2025-09-28: Expanded ImGuiStyle palette (TextDisabled, FrameBg*, CheckMark, SliderGrab), centered button text via ButtonTextAlign; added RadioButton widget (style-aware) with tests and sample demo.

@@ -21,6 +21,7 @@
   - [x] Add button widget with ID stack handling and hover/press tests.
   - [x] Text + Label helpers using embedded font atlas.
   - [x] Checkbox (bool toggle with label) with unit tests.
+  - [x] RadioButton (option selection) using style palette with unit tests.
   - [x] SliderFloat (drag to set value) with unit tests.
   - [x] Separator/NewLine/SeparatorText helpers with layout/draw tests.
 - [ ] Add style configuration and per-widget styling overrides.

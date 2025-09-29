@@ -72,6 +72,10 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
     advances the cursor with spacing above/below, mirroring Dear ImGui.
   - `ImGui.SeparatorText` centers a label between two separator halves; when the
     text is hidden (`##`), it falls back to a plain separator.
+- Style
+  - `ImGuiStyle` exposes spacing/padding and a colour table mirroring Dear ImGui
+    defaults (`Text`, `TextDisabled`, `FrameBg` variants, `Button` variants,
+    `CheckMark`, `SliderGrab`, etc.). Widgets source their colours from this palette.
 
 ## Renderer backend (Silk.NET OpenGL)
 
@@ -99,6 +103,10 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - ID derived from label (and ID stack when pushed) guards hover/active state.
   - Click press on the box activates; release over the box toggles the value.
   - Visuals: filled box with inner mark when checked; label drawn to the right.
+- RadioButton
+  - Similar hover/active behaviour; selecting an option assigns the bound value.
+  - Visuals: circular frame from `FrameBg` colours with inner dot using
+    `CheckMark` colour when selected.
 
 - SliderFloat
   - Press within the track activates; horizontal mouse drag maps pixels→value

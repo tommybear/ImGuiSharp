@@ -308,6 +308,11 @@ public sealed class ImGuiContext
         _drawListBuilder.AddRectFilled(rect, color);
     }
 
+    internal void AddCircleFilled(Vec2 center, float radius, Color color, int segments = 12)
+    {
+        _drawListBuilder.AddCircleFilled(center, radius, color, segments);
+    }
+
     internal void SetCurrentTexture(IntPtr textureId)
     {
         _drawListBuilder.SetTexture(textureId);

@@ -35,6 +35,7 @@ var mouseScroll = new Vec2(0f, 0f);
 float scrollY = 0f;
 bool[] demoChecks = Enumerable.Repeat(false, 32).ToArray();
 float[] demoValues = Enumerable.Repeat(0.5f, 32).ToArray();
+int mode = 0;
 
 static float Clamp(float v, float min, float max) => (v < min) ? min : (v > max ? max : v);
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
@@ -120,10 +121,16 @@ window.Update += deltaTime =>
     }
 
     ImGui.SetCursorPos(new Vec2(40f, 190f));
+    ImGui.SeparatorText("Mode");
+    ImGui.SetCursorPos(new Vec2(40f, 220f));
+    ImGui.RadioButton("Mode A", ref mode, 0);
+    ImGui.RadioButton("Mode B", ref mode, 1);
+
+    ImGui.SetCursorPos(new Vec2(40f, 280f));
     ImGui.Separator();
 
     // Demonstrate Label helper (absolute position, not affecting cursor)
-    ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 210f));
+    ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 300f));
 
     // Scrollable region demo
     // Scrollable region using BeginChild/EndChild
