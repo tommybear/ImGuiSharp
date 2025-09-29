@@ -39,6 +39,8 @@ string userName = "ImGuiSharp";
 string commandLine = string.Empty;
 string notes = "Use Tab here to insert\ta tab.";
 string status = string.Empty;
+float dragSensitivity = 0.5f;
+int dragItems = 10;
 
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
 
@@ -168,9 +170,24 @@ window.Update += deltaTime =>
         status = "Notes edited.";
     }
 
+    ImGui.SetCursorPos(new Vec2(40f, 520f));
+    ImGui.SeparatorText("Drags");
+
+    ImGui.SetCursorPos(new Vec2(40f, 550f));
+    if (ImGui.DragFloat("Sensitivity", ref dragSensitivity, 0.01f, 0f, 1f, "{0:0.00}"))
+    {
+        status = $"Sensitivity adjusted to {dragSensitivity:0.00}";
+    }
+
+    ImGui.SetCursorPos(new Vec2(40f, 590f));
+    if (ImGui.DragInt("Items", ref dragItems, 0.2f, 0, 100))
+    {
+        status = $"Item count changed to {dragItems}";
+    }
+
     if (!string.IsNullOrEmpty(status))
     {
-        ImGui.SetCursorPos(new Vec2(40f, 490f));
+        ImGui.SetCursorPos(new Vec2(40f, 630f));
         ImGui.Text(status);
     }
 

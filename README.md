@@ -49,7 +49,7 @@ Legend: ✅ implemented · ❌ not yet · 🟡 partial/limited
 | | ProgressBar | ✅ | ❌ | Planned |
 | | Combo/Selectables | ✅ | ❌ | Planned |
 | | InputText | ✅ | ❌ | Planned |
-| | Drag widgets (`DragFloat`, etc.) | ✅ | ❌ | Planned |
+| | Drag widgets (`DragFloat`, etc.) | ✅ | ✅ | DragFloat/DragInt with speed modifiers |
 | | Tree nodes / collapsing headers | ✅ | ❌ | Planned |
 | | Menus / MenuBar / Popup | ✅ | ❌ | Planned |
 | **Layout** | `SameLine`, `Spacing`, `NewLine` | ✅ | ✅ | Style spacing aware |

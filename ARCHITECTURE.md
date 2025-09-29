@@ -136,6 +136,12 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
     slider body.
   - Keyboard: default step is `(max-min)/100`; `Shift` multiplies by 10,
     `Ctrl` divides by 10. An optional explicit step overrides the base step.
+- DragFloat / DragInt
+  - Convert horizontal mouse deltas into accumulated increments with optional
+    min/max clamping. Shift multiplies and Ctrl divides the step, mirroring Dear
+    ImGui. Integers use an accumulator so partial movement is preserved.
+  - Drawn as framed numeric boxes with nav highlight/border behaviour shared via
+    `ButtonBehavior`.
 - InputText
   - Activation copies the bound string into an editing state tracking cursor,
     selection, and scroll. Supports `AutoSelectAll`, `EnterReturnsTrue`,

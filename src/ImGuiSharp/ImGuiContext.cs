@@ -28,6 +28,7 @@ public sealed class ImGuiContext
 
     private float _time;
     private Vec2 _mousePosition = Vec2.Zero;
+    private Vec2 _mousePositionPrev = Vec2.Zero;
     private Vec2 _cursorPos = Vec2.Zero;
     private float _pendingMouseWheelX;
     private float _pendingMouseWheelY;
@@ -38,6 +39,8 @@ public sealed class ImGuiContext
     private readonly System.Collections.Generic.Dictionary<string, float> _windowScrollY = new();
     private readonly System.Collections.Generic.Dictionary<string, ScrollbarState> _windowScrollbar = new();
     private readonly Stack<float> _wrapPosStack = new();
+    private uint _dragAccumId;
+    private float _dragAccum;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ImGuiContext"/> class.
@@ -189,6 +192,7 @@ public sealed class ImGuiContext
     /// <param name="position">Mouse position in pixels.</param>
     public void SetMousePosition(in Vec2 position)
     {
+        _mousePositionPrev = _mousePosition;
         _mousePosition = position;
         IO.MousePosition = position;
     }
@@ -658,6 +662,43 @@ public sealed class ImGuiContext
         }
 
         return !_mouseButtons[index] && _mouseButtonsPrev[index];
+    }
+
+    internal Vec2 GetMouseDelta() => _mousePosition - _mousePositionPrev;
+
+    internal void BeginDragAccum(uint id)
+    {
+        _dragAccumId = id;
+        _dragAccum = 0f;
+    }
+
+    internal float AccumulateDragDelta(uint id, float delta)
+    {
+        if (_dragAccumId != id)
+        {
+            _dragAccumId = id;
+            _dragAccum = 0f;
+        }
+
+        _dragAccum += delta;
+        return _dragAccum;
+    }
+
+    internal void ConsumeDragDelta(uint id, float amount)
+    {
+        if (_dragAccumId == id)
+        {
+            _dragAccum -= amount;
+        }
+    }
+
+    internal void ResetDragAccum(uint id)
+    {
+        if (_dragAccumId == id)
+        {
+            _dragAccumId = 0;
+            _dragAccum = 0f;
+        }
     }
 
     /// <summary>Builds draw data for the current frame.</summary>

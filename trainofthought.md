@@ -54,3 +54,5 @@
 - 2025-09-28: Implemented basic keyboard navigation (Tab/Shift+Tab/arrow focus cycling), wired up FocusedId, and added navigation unit tests.
 - 2025-09-29: Added nav highlight borders (style.NavHighlight) for checkbox/slider/radio/buttons, respected `style.FrameBorderSize` with border colour support, expanded item rects to include labels, ensured label clicks toggle selection, added PushStyleColor/PushStyleVar stacks, refactored pointer handling through a shared ButtonBehavior helper, and covered with navigation + widget tests.
 - 2025-09-29: Implemented single-line InputText mirroring Dear ImGui (editing state, selection, cursor/scroll, EnterReturnsTrue/AutoSelectAll/AllowTabInput flags) with new unit tests, and updated the sample to showcase the new text fields.
+
+- 2025-09-29: Added DragFloat/DragInt with accumulated mouse delta, modifier scaling, clamping, unit tests, and sample coverage.

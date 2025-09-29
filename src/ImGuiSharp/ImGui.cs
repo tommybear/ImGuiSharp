@@ -889,6 +889,194 @@ public static class ImGui
     }
 
     /// <summary>
+    /// Draggable float slider.
+    /// </summary>
+    public static bool DragFloat(string label, ref float value, float speed = 1f, float min = float.NegativeInfinity, float max = float.PositiveInfinity, string? format = null, Vec2? size = null)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+
+        var context = GetCurrentContext();
+        var style = context.Style;
+        var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
+        var cursor = context.CursorPos;
+        var framePadding = style.FramePadding;
+        var lineHeight = context.GetLineHeight();
+
+        float width = size?.X ?? 140f;
+        float height = size?.Y ?? (lineHeight + framePadding.Y * 2f);
+        var frameSize = new Vec2(width, height);
+        var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + frameSize.X, cursor.Y + frameSize.Y);
+        context.RegisterItem(id, rect);
+
+        var behavior = ButtonBehavior(context, rect, id);
+        bool hovered = behavior.Hovered;
+        bool held = context.ActiveId == id;
+        bool hasFocus = context.FocusedId == id;
+        bool changed = false;
+
+        if (behavior.Activated)
+        {
+            context.BeginDragAccum(id);
+        }
+
+        if (held && behavior.Held)
+        {
+            var mouseDelta = context.GetMouseDelta().X;
+            if (mouseDelta != 0f)
+            {
+                float step = mouseDelta * speed;
+                if (context.IsKeyDown(ImGuiKey.LeftShift) || context.IsKeyDown(ImGuiKey.RightShift))
+                {
+                    step *= 10f;
+                }
+                if (context.IsKeyDown(ImGuiKey.LeftCtrl) || context.IsKeyDown(ImGuiKey.RightCtrl))
+                {
+                    step /= 10f;
+                }
+
+                if (step != 0f)
+                {
+                    float newValue = value + step;
+                    if (!float.IsNegativeInfinity(min) || !float.IsPositiveInfinity(max))
+                    {
+                        if (min <= max)
+                        {
+                            newValue = SMath.Clamp(newValue, min, max);
+                        }
+                    }
+
+                    if (!float.IsNaN(newValue) && newValue != value)
+                    {
+                        value = newValue;
+                        changed = true;
+                        context.MarkItemEdited();
+                    }
+                }
+            }
+        }
+
+        if (behavior.Released)
+        {
+            context.ResetDragAccum(id);
+        }
+
+        var frameColor = held ? style.GetColor(ImGuiCol.FrameBgActive) : (hovered ? style.GetColor(ImGuiCol.FrameBgHovered) : style.GetColor(ImGuiCol.FrameBg));
+        FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX - rect.MinX, rect.MaxY - rect.MinY), frameColor);
+
+        string display = format != null ? string.Format(format, value) : value.ToString("0.000");
+        var textPos = new Vec2(rect.MinX + framePadding.X, rect.MinY + framePadding.Y + context.GetAscent());
+        context.AddText(textPos, display, style.GetColor(ImGuiCol.Text));
+
+        if (!string.IsNullOrEmpty(renderLabel))
+        {
+            var labelPos = new Vec2(rect.MaxX + style.ItemSpacing.X, rect.MinY + context.GetAscent());
+            context.AddText(labelPos, renderLabel, style.GetColor(ImGuiCol.Text));
+        }
+
+        RenderNavHighlight(context, rect, id);
+        RenderFrameBorder(context, rect);
+        context.UpdateItemStatusFlags(hovered, held, behavior.Pressed, behavior.Released, context.FocusedId == id);
+
+        context.AdvanceCursor(new Vec2(0f, frameSize.Y));
+        return changed;
+    }
+
+    /// <summary>
+    /// Draggable integer slider.
+    /// </summary>
+    public static bool DragInt(string label, ref int value, float speed = 1f, int min = int.MinValue, int max = int.MaxValue, Vec2? size = null)
+    {
+        ArgumentNullException.ThrowIfNull(label);
+
+        var context = GetCurrentContext();
+        var style = context.Style;
+        var id = context.GetId(label);
+        var renderLabel = GetRenderedLabel(label);
+        var cursor = context.CursorPos;
+        var framePadding = style.FramePadding;
+        var lineHeight = context.GetLineHeight();
+
+        float width = size?.X ?? 140f;
+        float height = size?.Y ?? (lineHeight + framePadding.Y * 2f);
+        var frameSize = new Vec2(width, height);
+        var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + frameSize.X, cursor.Y + frameSize.Y);
+        context.RegisterItem(id, rect);
+
+        var behavior = ButtonBehavior(context, rect, id);
+        bool hovered = behavior.Hovered;
+        bool held = context.ActiveId == id;
+        bool hasFocus = context.FocusedId == id;
+        bool changed = false;
+
+        if (behavior.Activated)
+        {
+            context.BeginDragAccum(id);
+        }
+
+        if (held && behavior.Held)
+        {
+            var mouseDelta = context.GetMouseDelta().X;
+            if (mouseDelta != 0f)
+            {
+                float step = mouseDelta * speed;
+                if (context.IsKeyDown(ImGuiKey.LeftShift) || context.IsKeyDown(ImGuiKey.RightShift))
+                {
+                    step *= 10f;
+                }
+                if (context.IsKeyDown(ImGuiKey.LeftCtrl) || context.IsKeyDown(ImGuiKey.RightCtrl))
+                {
+                    step /= 10f;
+                }
+
+                if (step != 0f)
+                {
+                    float accum = context.AccumulateDragDelta(id, step);
+                    int whole = (int)SMath.Truncate(accum);
+                    if (whole != 0)
+                    {
+                        int newValue = value + whole;
+                        if (newValue < min) newValue = min;
+                        if (newValue > max) newValue = max;
+                        if (newValue != value)
+                        {
+                            value = newValue;
+                            changed = true;
+                            context.MarkItemEdited();
+                        }
+                        context.ConsumeDragDelta(id, whole);
+                    }
+                }
+            }
+        }
+
+        if (behavior.Released)
+        {
+            context.ResetDragAccum(id);
+        }
+
+        var frameColor = held ? style.GetColor(ImGuiCol.FrameBgActive) : (hovered ? style.GetColor(ImGuiCol.FrameBgHovered) : style.GetColor(ImGuiCol.FrameBg));
+        FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX - rect.MinX, rect.MaxY - rect.MinY), frameColor);
+
+        string display = value.ToString();
+        var textPos = new Vec2(rect.MinX + framePadding.X, rect.MinY + framePadding.Y + context.GetAscent());
+        context.AddText(textPos, display, style.GetColor(ImGuiCol.Text));
+
+        if (!string.IsNullOrEmpty(renderLabel))
+        {
+            var labelPos = new Vec2(rect.MaxX + style.ItemSpacing.X, rect.MinY + context.GetAscent());
+            context.AddText(labelPos, renderLabel, style.GetColor(ImGuiCol.Text));
+        }
+
+        RenderNavHighlight(context, rect, id);
+        RenderFrameBorder(context, rect);
+        context.UpdateItemStatusFlags(hovered, held, behavior.Pressed, behavior.Released, context.FocusedId == id);
+
+        context.AdvanceCursor(new Vec2(0f, frameSize.Y));
+        return changed;
+    }
+
+    /// <summary>
     /// Text input field. Returns true when the buffer changes or, if specified, when Enter is pressed.
     /// </summary>
     public static bool InputText(string label, ref string text, int maxLength = int.MaxValue, ImGuiInputTextFlags flags = ImGuiInputTextFlags.None, Vec2? size = null)
@@ -941,6 +1129,7 @@ public static class ImGui
             context.SetFocusId(id);
         }
 
+        IReadOnlyList<IImGuiInputEvent> events = Array.Empty<IImGuiInputEvent>();
         bool valueChanged = false;
         bool submit = false;
         if (state.Id == id && (context.ActiveId == id || context.ActiveId == 0))
@@ -950,7 +1139,8 @@ public static class ImGui
             context.SetFocusId(id);
 
             var deactivateReason = InputTextDeactivateReason.None;
-            bool changed = ProcessInputText(context, state, flags, actualMaxLength, ref text, out deactivateReason, out submit);
+            events = context.DrainInputEvents();
+            bool changed = ProcessInputText(context, state, flags, actualMaxLength, ref text, events, out deactivateReason, out submit);
             if (changed)
             {
                 valueChanged = true;
@@ -1213,15 +1403,13 @@ public static class ImGui
         Other,
     }
 
-    private static bool ProcessInputText(ImGuiContext context, ImGuiInputTextState state, ImGuiInputTextFlags flags, int maxLength, ref string text, out InputTextDeactivateReason deactivateReason, out bool submit)
+    private static bool ProcessInputText(ImGuiContext context, ImGuiInputTextState state, ImGuiInputTextFlags flags, int maxLength, ref string text, IReadOnlyList<IImGuiInputEvent> events, out InputTextDeactivateReason deactivateReason, out bool submit)
     {
         deactivateReason = InputTextDeactivateReason.None;
         submit = false;
 
         bool readOnly = (flags & ImGuiInputTextFlags.ReadOnly) != 0;
         bool changed = false;
-
-        var events = context.DrainInputEvents();
         if (!readOnly)
         {
             foreach (var evt in events)

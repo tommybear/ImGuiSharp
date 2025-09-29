@@ -15,7 +15,7 @@
 - Finish clipping, scrolling, child windows, and style overrides.
 - Add golden tests for layout scenarios and widget interactions.
 - Status: text/label + buttons complete; child windows with wheel scrolling and basic draggable scrollbar implemented; Checkbox/RadioButton/SliderFloat present with tests; item query API mirrors Dear ImGui.
-- Status (continued): InputText now mirrors Dear ImGui’s single-line behaviour with cursor/selection handling and tests.
+- Status (continued): InputText now mirrors Dear ImGui’s single-line behaviour with cursor/selection handling and tests. DragFloat/DragInt reuse shared button behavior with modifier-aware steps and unit coverage.
 
 ## Milestone 3 – Rendering Backend (Weeks 10-13)
 - Finalise renderer abstraction and complete the reference OpenGL backend.
