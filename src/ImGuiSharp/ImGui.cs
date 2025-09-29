@@ -819,6 +819,7 @@ public static class ImGui
             {
                 value = newVal;
                 changed = true;
+                context.MarkItemEdited();
             }
         }
 
@@ -870,6 +871,10 @@ public static class ImGui
             if (value < min) value = min;
             if (value > max) value = max;
             if (value != v0) changed = true;
+            if (changed)
+            {
+                context.MarkItemEdited();
+            }
         }
 
         // Draw track and knob
@@ -1127,7 +1132,7 @@ public static class ImGui
         {
             return false;
         }
-        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Focused) != 0;
+        return ctx.LastItemId == ctx.FocusedId;
     }
 
     public static bool IsItemClicked(ImGuiMouseButton button = ImGuiMouseButton.Left)
@@ -1144,6 +1149,28 @@ public static class ImGui
         }
 
         return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Released) != 0;
+    }
+
+    public static bool IsItemDeactivated()
+    {
+        var ctx = GetCurrentContext();
+        if (ctx.LastItemId == 0)
+        {
+            return false;
+        }
+
+        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Deactivated) != 0;
+    }
+
+    public static bool IsItemDeactivatedAfterEdit()
+    {
+        var ctx = GetCurrentContext();
+        if (!IsItemDeactivated())
+        {
+            return false;
+        }
+
+        return ctx.LastItemEditedFrame == ctx.FrameCount;
     }
 
 }

@@ -12,5 +12,6 @@ public enum ImGuiItemStatusFlags
     Released = 1 << 3,
     Active = 1 << 4,
     Focused = 1 << 5,
+    Deactivated = 1 << 6,
+    Edited = 1 << 7,
 }
-

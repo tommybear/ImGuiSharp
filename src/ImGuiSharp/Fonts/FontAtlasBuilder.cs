@@ -4,8 +4,19 @@ using StbTrueTypeSharp;
 
 namespace ImGuiSharp.Fonts;
 
+/// <summary>
+/// Builds font atlases from embedded TTF data using stb_truetype.
+/// </summary>
 public static class FontAtlasBuilder
 {
+    /// <summary>
+    /// Bakes the provided font bytes into an RGBA atlas with glyph metrics.
+    /// </summary>
+    /// <param name="ttfBytes">Raw TTF font bytes.</param>
+    /// <param name="pixelHeight">Desired pixel height for baked glyphs.</param>
+    /// <param name="atlasWidth">Atlas width in pixels.</param>
+    /// <param name="atlasHeight">Atlas height in pixels.</param>
+    /// <returns>A populated <see cref="FontAtlas"/>.</returns>
     public static FontAtlas Build(byte[] ttfBytes, float pixelHeight = 18f, int atlasWidth = 512, int atlasHeight = 512)
     {
         const int firstChar = 32;   // space

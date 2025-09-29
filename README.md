@@ -17,7 +17,7 @@ purely for comparison while we build feature parity.
 - Widgets & layout: `ImGui.Button`, `ImGui.Text`, `ImGui.Label`, `ImGui.Checkbox`, `ImGui.RadioButton`, `ImGui.SliderFloat`,
   `ImGui.Separator`, `ImGui.SeparatorText`, `ImGui.NewLine`, `ImGui.Begin/End`, `ImGui.BeginChild/EndChild` (padding + clipping),
   mouse‑wheel scrolling with persisted per‑window offset
-- Item queries: `ImGui.IsItemHovered/Active/Focused/Clicked`
+- Item queries: `ImGui.IsItemHovered/Active/Focused/Clicked/Deactivated/DeactivatedAfterEdit`
 - Scrollbars: simple vertical thumb sized by visible/content, draggable
 - Renderer (Silk.NET OpenGL): VAO/VBO/EBO, blending, scissor, per‑command
   texture binding + default 1×1 white fallback, scissor‑aware clear fix

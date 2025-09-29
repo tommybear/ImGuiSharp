@@ -1,5 +1,8 @@
 namespace ImGuiSharp;
 
+/// <summary>
+/// Enumerates style colour slots mirroring Dear ImGui defaults.
+/// </summary>
 public enum ImGuiCol
 {
     Text = 0,

@@ -4,8 +4,15 @@ using System.Reflection;
 
 namespace ImGuiSharp.Fonts;
 
+/// <summary>
+/// Provides access to the embedded Proggy Clean TTF font used as the default style font.
+/// </summary>
 public static class EmbeddedProggyClean
 {
+    /// <summary>
+    /// Retrieves the raw font bytes for the embedded Proggy Clean font.
+    /// </summary>
+    /// <returns>Byte array containing the TTF data.</returns>
     public static byte[] GetBytes()
     {
         var asm = Assembly.GetExecutingAssembly();
@@ -16,4 +23,3 @@ public static class EmbeddedProggyClean
         return ms.ToArray();
     }
 }
-

@@ -6,6 +6,9 @@ public sealed class ImGuiStyle
 {
     private readonly Color[] _colors = new Color[(int)ImGuiCol.Count];
 
+    /// <summary>
+    /// Initializes default style values matching Dear ImGui.
+    /// </summary>
     public ImGuiStyle()
     {
         ItemSpacing = new Vec2(8f, 4f);
@@ -26,14 +29,19 @@ public sealed class ImGuiStyle
         SetColor(ImGuiCol.SliderGrabActive, new Color(0.41f, 0.43f, 0.51f, 1f));
     }
 
+    /// <summary>Gets or sets the spacing between consecutive items.</summary>
     public Vec2 ItemSpacing { get; set; }
 
+    /// <summary>Gets or sets padding applied inside frame widgets (buttons, sliders).</summary>
     public Vec2 FramePadding { get; set; }
 
+    /// <summary>Gets or sets button text alignment within the button rectangle.</summary>
     public Vec2 ButtonTextAlign { get; set; }
 
+    /// <summary>Gets the colour associated with the specified slot.</summary>
     public Color GetColor(ImGuiCol idx) => _colors[(int)idx];
 
+    /// <summary>Sets the colour associated with the specified slot.</summary>
     public void SetColor(ImGuiCol idx, Color color)
     {
         _colors[(int)idx] = color;

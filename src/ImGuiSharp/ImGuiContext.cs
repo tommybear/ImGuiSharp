@@ -91,6 +91,10 @@ public sealed class ImGuiContext
 
     public ImGuiMouseButton LastItemPressedButton { get; private set; }
 
+    public uint FocusedId { get; private set; }
+
+    public uint LastItemEditedFrame { get; private set; }
+
     /// <summary>
     /// Gets the current cursor position used for automatic layout.
     /// </summary>
@@ -112,6 +116,7 @@ public sealed class ImGuiContext
         LastItemRect = default;
         LastItemStatusFlags = ImGuiItemStatusFlags.None;
         LastItemPressedButton = ImGuiMouseButton.Left;
+        LastItemEditedFrame = 0;
         IO.MouseWheel = _pendingMouseWheelY;
         IO.MouseWheelH = _pendingMouseWheelX;
         _pendingMouseWheelX = 0f;
@@ -423,6 +428,8 @@ public sealed class ImGuiContext
         LastItemId = id;
         LastItemRect = rect;
         LastItemStatusFlags = ImGuiItemStatusFlags.None;
+        LastItemPressedButton = ImGuiMouseButton.Left;
+        LastItemEditedFrame = 0;
     }
 
     internal void UpdateItemStatusFlags(bool hovered, bool held, bool pressed, bool released, bool focused)
@@ -455,9 +462,16 @@ public sealed class ImGuiContext
 
     internal void MarkItemReleased()
     {
-        LastItemStatusFlags |= ImGuiItemStatusFlags.Released;
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Released | ImGuiItemStatusFlags.Deactivated;
         LastItemStatusFlags &= ~ImGuiItemStatusFlags.Held;
         LastItemStatusFlags &= ~ImGuiItemStatusFlags.Active;
+        FocusedId = LastItemId;
+    }
+
+    internal void MarkItemEdited()
+    {
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Edited;
+        LastItemEditedFrame = FrameCount;
     }
 
     internal bool IsMouseHoveringRect(Vec2 min, Vec2 max)

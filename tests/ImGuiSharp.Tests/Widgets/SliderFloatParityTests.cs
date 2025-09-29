@@ -86,6 +86,7 @@ public sealed class SliderFloatParityTests
         Assert.Equal(1f, v, 3);
         Assert.True(ImGui.IsItemHovered());
         Assert.False(ImGui.IsItemActive());
+        // Deactivated-after-edit is only meaningful for mouse release; keyboard nav keeps item active.
 
         // Try increasing beyond max: should clamp and not change further
         ctx.NewFrame();
