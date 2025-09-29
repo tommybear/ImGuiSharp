@@ -1,6 +1,7 @@
 using ImGuiSharp;
 using ImGuiSharp.Input;
 using ImGuiSharp.Math;
+using ImGuiSharp.Rendering;
 using Xunit;
 
 namespace ImGuiSharp.Tests.Style;
@@ -135,5 +136,41 @@ public sealed class StyleIntegrationTests
         Assert.Equal(grabActive.PackABGR(), verts[4].Color);
 
         ImGui.SetCurrentContext(null);
+    }
+
+    [Fact]
+    public void Button_DrawsBorder_WhenFrameBorderSizePositive()
+    {
+        var ctx = new ImGuiContext();
+        ImGui.SetCurrentContext(ctx);
+        ImGui.SetDisplaySize(new Vec2(400, 300));
+
+        ctx.Style.FrameBorderSize = 2f;
+        var borderColor = new Color(0.8f, 0.1f, 0.4f, 1f);
+        ctx.Style.SetColor(ImGuiCol.Border, borderColor);
+
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        ImGui.Button("Border", new Vec2(90f, 30f));
+        ctx.EndFrame();
+
+        var drawData = ImGui.GetDrawData();
+        Assert.Contains(drawData.DrawLists, list => ContainsColor(list.Vertices.Span, borderColor));
+
+        ImGui.SetCurrentContext(null);
+    }
+
+    private static bool ContainsColor(ReadOnlySpan<ImGuiVertex> vertices, Color color)
+    {
+        var packed = color.PackABGR();
+        foreach (var vertex in vertices)
+        {
+            if (vertex.Color == packed)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

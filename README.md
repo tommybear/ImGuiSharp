@@ -61,7 +61,7 @@ Legend: ✅ implemented · ❌ not yet · 🟡 partial/limited
 | | Keyboard navigation | ✅ | 🟡 | Tab/arrow focus cycling implemented; full nav TBD |
 | | Gamepad navigation | ✅ | ❌ | Not implemented |
 | **Style** | Colour palette editing | ✅ | ✅ | `ImGuiStyle.SetColor` for core slots |
-| | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✅ | 🟡 | Padding/spacing/text align exposed; style stacks pending |
+| | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✅ | 🟡 | Padding/spacing/text align/frame border size exposed; style stacks pending |
 | | Style stacks (`PushStyleVar/Color`) | ✅ | ❌ | Not implemented |
 | | Theme editing helpers (`ImGui::StyleColors*`) | ✅ | ❌ | To be added |
 | **Text/Item Queries** | Deactivated/AfterEdit / Active status | ✅ | ✅ | Per-item status flags |

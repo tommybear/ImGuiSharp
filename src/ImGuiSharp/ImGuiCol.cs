@@ -29,6 +29,8 @@ public enum ImGuiCol
     SliderGrab,
     /// <summary>Colour of the slider grab handle when active.</summary>
     SliderGrabActive,
+    /// <summary>Frame/window border colour.</summary>
+    Border,
     /// <summary>Navigation/focus highlight colour.</summary>
     NavHighlight,
     /// <summary>Total number of style colour slots.</summary>

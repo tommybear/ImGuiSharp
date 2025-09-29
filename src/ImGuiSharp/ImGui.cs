@@ -250,6 +250,9 @@ public static class ImGui
             context.AddText(new Vec2(posX, baselineY), renderLabel, style.GetColor(ImGuiCol.Text));
         }
 
+        RenderNavHighlight(context, rect, id);
+        RenderFrameBorder(context, rect);
+
         context.AdvanceCursor(actualSize);
         return pressed;
     }
@@ -791,12 +794,8 @@ public static class ImGui
             context.AddText(new Vec2(textX, textBaseY), renderLabel, textColor);
         }
 
-        if (hasFocus)
-        {
-            var navColor = style.GetColor(ImGuiCol.NavHighlight);
-            var highlightRect = ExpandRect(totalRect, 2f);
-            context.AddRect(highlightRect, navColor, 2f);
-        }
+        RenderNavHighlight(context, totalRect, id);
+        RenderFrameBorder(context, boxRect);
 
         context.AdvanceCursor(new Vec2(0f, totalHeight));
         return changed;
@@ -936,12 +935,8 @@ public static class ImGui
             context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, textColor);
         }
 
-        if (hasFocus)
-        {
-            var navColor = style.GetColor(ImGuiCol.NavHighlight);
-            var highlightRect = ExpandRect(rect, 2f);
-            context.AddRect(highlightRect, navColor, 2f);
-        }
+        RenderNavHighlight(context, rect, id);
+        RenderFrameBorder(context, rect);
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
         return changed || released; // true when value changed this frame or on commit
@@ -1032,12 +1027,7 @@ public static class ImGui
             context.AddText(new Vec2(textX, textBaseY), renderLabel, style.GetColor(ImGuiCol.Text));
         }
 
-        if (hasFocus)
-        {
-            var navColor = style.GetColor(ImGuiCol.NavHighlight);
-            var highlightRect = ExpandRect(totalRect, 2f);
-            context.AddRect(highlightRect, navColor, 2f);
-        }
+        RenderNavHighlight(context, totalRect, id);
 
         context.AdvanceCursor(new Vec2(0f, totalHeight));
         return changed;
@@ -1114,6 +1104,40 @@ public static class ImGui
         }
 
         return 0;
+    }
+
+    private static void RenderNavHighlight(ImGuiContext context, in ImGuiRect rect, uint id)
+    {
+        if (id == 0 || context.FocusedId != id)
+        {
+            return;
+        }
+
+        var color = context.Style.GetColor(ImGuiCol.NavHighlight);
+        if (color.A <= 0f)
+        {
+            return;
+        }
+
+        var highlightRect = ExpandRect(rect, 2f);
+        context.AddRect(highlightRect, color, 2f);
+    }
+
+    private static void RenderFrameBorder(ImGuiContext context, in ImGuiRect rect)
+    {
+        float borderSize = context.Style.FrameBorderSize;
+        if (borderSize <= 0f)
+        {
+            return;
+        }
+
+        var color = context.Style.GetColor(ImGuiCol.Border);
+        if (color.A <= 0f)
+        {
+            return;
+        }
+
+        context.AddRect(rect, color, borderSize);
     }
 
     private static ImGuiRect ExpandRect(in ImGuiRect rect, float amount)

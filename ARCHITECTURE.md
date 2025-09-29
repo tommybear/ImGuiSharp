@@ -77,6 +77,8 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
     defaults (`Text`, `TextDisabled`, `FrameBg` variants, `Button` variants,
     `CheckMark`, `SliderGrab`, `NavHighlight`, etc.). Widgets source their
     colours from this palette and render focus borders using `NavHighlight`.
+    `FrameBorderSize` controls optional borders drawn around frame widgets when
+    non-zero, matching Dear ImGui's `style.FrameBorderSize`.
 - Item queries
   - After each widget submission, `LastItemStatusFlags` tracks hover/active/press
     state. Public helpers mirror Dear ImGui: `ImGui.IsItemHovered/Active/Focused`
