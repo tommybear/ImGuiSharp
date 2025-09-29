@@ -48,6 +48,51 @@ public sealed class CheckboxSliderTests
     }
 
     [Fact]
+    public void Checkbox_Toggles_WhenClickingLabelArea()
+    {
+        var ctx = new ImGuiContext();
+        ImGui.SetCurrentContext(ctx);
+        ImGui.SetDisplaySize(new Vec2(400, 300));
+
+        bool val = false;
+
+        // Frame 1: hover label region without clicking
+        ctx.SetMousePosition(new Vec2(40f, 10f));
+        ctx.SetMouseButtonState(Input.ImGuiMouseButton.Left, false);
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        var changed = ImGui.Checkbox("Click Label", ref val);
+        ctx.EndFrame();
+        Assert.False(changed);
+        Assert.False(val);
+        var rect = ctx.LastItemRect;
+        Assert.InRange(40f, rect.MinX, rect.MaxX);
+        Assert.InRange(10f, rect.MinY, rect.MaxY);
+
+        // Frame 2: press while hovering label area
+        ctx.SetMousePosition(new Vec2(40f, 10f));
+        ctx.SetMouseButtonState(Input.ImGuiMouseButton.Left, true);
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        changed = ImGui.Checkbox("Click Label", ref val);
+        ctx.EndFrame();
+        Assert.False(changed);
+        Assert.False(val);
+
+        // Frame 3: release to toggle
+        ctx.SetMousePosition(new Vec2(40f, 10f));
+        ctx.SetMouseButtonState(Input.ImGuiMouseButton.Left, false);
+        ctx.NewFrame();
+        ImGui.SetCursorPos(Vec2.Zero);
+        changed = ImGui.Checkbox("Click Label", ref val);
+        ctx.EndFrame();
+        Assert.True(changed);
+        Assert.True(val);
+
+        ImGui.SetCurrentContext(null);
+    }
+
+    [Fact]
     public void Checkbox_UsesIdStack_ForDuplicateLabels()
     {
         var ctx = new ImGuiContext();
@@ -117,4 +162,3 @@ public sealed class CheckboxSliderTests
         ImGui.SetCurrentContext(null);
     }
 }
-

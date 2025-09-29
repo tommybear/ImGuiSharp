@@ -18,8 +18,10 @@ public sealed class ImGuiContext
     private readonly bool[] _mouseButtons = new bool[3];
     private readonly bool[] _mouseButtonsPrev = new bool[3];
     private readonly Dictionary<ImGuiKey, bool> _keyStates = new();
+    private readonly Dictionary<ImGuiKey, bool> _keyStatesPrev = new();
     private readonly Stack<uint> _idStack = new();
     private readonly ImGuiDrawListBuilder _drawListBuilder = new();
+    private readonly List<uint> _focusableItems = new();
 
     private float _time;
     private Vec2 _mousePosition = Vec2.Zero;
@@ -125,6 +127,7 @@ public sealed class ImGuiContext
         _pendingMouseWheelX = 0f;
         _pendingMouseWheelY = 0f;
         _drawListBuilder.Reset();
+        _focusableItems.Clear();
         IsFrameStarted = true;
     }
 
@@ -139,9 +142,12 @@ public sealed class ImGuiContext
             throw new InvalidOperationException("EndFrame called without a matching NewFrame call.");
         }
 
+        ProcessNavigation();
+
         IsFrameStarted = false;
         FrameCount++;
         Array.Copy(_mouseButtons, _mouseButtonsPrev, _mouseButtons.Length);
+        SyncKeyStates();
     }
 
     /// <summary>
@@ -325,6 +331,11 @@ public sealed class ImGuiContext
         _drawListBuilder.AddRectFilled(rect, color);
     }
 
+    internal void AddRect(in ImGuiRect rect, Color color, float thickness = 1f)
+    {
+        _drawListBuilder.AddRect(rect, color, thickness);
+    }
+
     internal void AddCircleFilled(Vec2 center, float radius, Color color, int segments = 12)
     {
         _drawListBuilder.AddCircleFilled(center, radius, color, segments);
@@ -435,6 +446,14 @@ public sealed class ImGuiContext
         LastItemStatusFlags = ImGuiItemStatusFlags.None;
         LastItemPressedButton = ImGuiMouseButton.Left;
         LastItemEditedFrame = 0;
+        if (id != 0)
+        {
+            _focusableItems.Add(id);
+        }
+        if (FocusedId == id)
+        {
+            LastItemStatusFlags |= ImGuiItemStatusFlags.Focused;
+        }
     }
 
     internal void UpdateItemStatusFlags(bool hovered, bool held, bool pressed, bool released, bool focused)
@@ -489,6 +508,18 @@ public sealed class ImGuiContext
     {
         var index = (int)button;
         return (uint)index < _mouseButtons.Length && _mouseButtons[index];
+    }
+
+    internal bool IsKeyDown(ImGuiKey key)
+    {
+        return _keyStates.TryGetValue(key, out var value) && value;
+    }
+
+    internal bool IsKeyJustPressed(ImGuiKey key)
+    {
+        var down = _keyStates.TryGetValue(key, out var value) && value;
+        var prev = _keyStatesPrev.TryGetValue(key, out var prevValue) && prevValue;
+        return down && !prev;
     }
 
     internal bool IsMouseJustPressed(ImGuiMouseButton button)
@@ -699,6 +730,76 @@ public sealed class ImGuiContext
         if (ws.IsChild)
         {
             AdvanceCursor(new Vec2(0f, ws.Size.Y + DefaultItemSpacingY));
+        }
+    }
+
+    private void ProcessNavigation()
+    {
+        if (_focusableItems.Count == 0)
+        {
+            return;
+        }
+
+        bool shiftDown = IsKeyDown(ImGuiKey.LeftShift) || IsKeyDown(ImGuiKey.RightShift);
+        bool moveForward = IsKeyJustPressed(ImGuiKey.Tab) && !shiftDown;
+        bool moveBackward = IsKeyJustPressed(ImGuiKey.Tab) && shiftDown;
+
+        if (!moveForward && !moveBackward)
+        {
+            if (IsKeyJustPressed(ImGuiKey.Right) || IsKeyJustPressed(ImGuiKey.Down))
+            {
+                moveForward = true;
+            }
+            else if (IsKeyJustPressed(ImGuiKey.Left) || IsKeyJustPressed(ImGuiKey.Up))
+            {
+                moveBackward = true;
+            }
+        }
+
+        if (moveForward)
+        {
+            FocusNextItem(reverse: false);
+        }
+        else if (moveBackward)
+        {
+            FocusNextItem(reverse: true);
+        }
+    }
+
+    private void FocusNextItem(bool reverse)
+    {
+        if (_focusableItems.Count == 0)
+        {
+            return;
+        }
+
+        int index;
+        if (FocusedId == 0)
+        {
+            index = reverse ? _focusableItems.Count - 1 : 0;
+        }
+        else
+        {
+            index = _focusableItems.IndexOf(FocusedId);
+            if (index == -1)
+            {
+                index = 0;
+            }
+
+            index = reverse
+                ? (index - 1 + _focusableItems.Count) % _focusableItems.Count
+                : (index + 1) % _focusableItems.Count;
+        }
+
+        FocusedId = _focusableItems[index];
+    }
+
+    private void SyncKeyStates()
+    {
+        _keyStatesPrev.Clear();
+        foreach (var kvp in _keyStates)
+        {
+            _keyStatesPrev[kvp.Key] = kvp.Value;
         }
     }
 

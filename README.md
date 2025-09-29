@@ -58,7 +58,7 @@ Legend: ✅ implemented · ❌ not yet · 🟡 partial/limited
 | | Columns, tables, layout helpers | ✅ | ❌ | Future milestone |
 | | Multi-viewport/platform windows | ✅ | ❌ | Not yet planned |
 | **Navigation & Focus** | Hover/focus state reporting | ✅ | ✅ | Item status flags |
-| | Keyboard navigation | ✅ | ❌ | Focus tracking only; nav TBD |
+| | Keyboard navigation | ✅ | 🟡 | Tab/arrow focus cycling implemented; full nav TBD |
 | | Gamepad navigation | ✅ | ❌ | Not implemented |
 | **Style** | Colour palette editing | ✅ | ✅ | `ImGuiStyle.SetColor` for core slots |
 | | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✅ | 🟡 | Padding/spacing/text align exposed; style stacks pending |

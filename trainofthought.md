@@ -51,3 +51,5 @@
 - 2025-09-28: SliderFloat keyboard parity: added optional step parameter, Shift/Ctrl modifiers (x10, /10) mirroring Dear ImGui; expanded tests for modifiers and explicit steps; documentation updated.
 - 2025-09-28: Expanded ImGuiStyle palette (TextDisabled, FrameBg*, CheckMark, SliderGrab), centered button text via ButtonTextAlign; added RadioButton widget (style-aware) with tests and sample demo.
 - 2025-09-28: Added item query helpers (IsItemHovered/Active/Focused/Clicked/Deactivated/DeactivatedAfterEdit) with per-item status flags; updated docs and slider/button tests.
+- 2025-09-28: Implemented basic keyboard navigation (Tab/Shift+Tab/arrow focus cycling), wired up FocusedId, and added navigation unit tests.
+- 2025-09-29: Added nav highlight borders (style.NavHighlight) for checkbox/slider/radio, expanded item rects to include labels, ensured label clicks toggle selection, and covered with navigation + widget tests.

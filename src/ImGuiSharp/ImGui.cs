@@ -215,6 +215,7 @@ public static class ImGui
         var normal = style.GetColor(ImGuiCol.Button);
         var hovered = style.GetColor(ImGuiCol.ButtonHovered);
         var active = style.GetColor(ImGuiCol.ButtonActive);
+        bool hasFocus = context.FocusedId == id;
 
         Color drawColor;
         if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
@@ -222,6 +223,10 @@ public static class ImGui
             drawColor = active;
         }
         else if (isHovered)
+        {
+            drawColor = hovered;
+        }
+        else if (hasFocus)
         {
             drawColor = hovered;
         }
@@ -718,15 +723,24 @@ public static class ImGui
         var cursor = context.CursorPos;
         var lineH = context.GetLineHeight();
         float boxSize = MathF.Min(16f, lineH);
-        var rect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + boxSize, cursor.Y + boxSize);
-        context.RegisterItem(id, rect);
+        bool hasLabel = !string.IsNullOrEmpty(renderLabel);
+        var labelSize = hasLabel ? CalcTextSize(renderLabel) : Vec2.Zero;
+        float labelWidth = hasLabel ? (labelSize.X > 0f ? labelSize.X : lineH) : 0f;
+        float labelHeight = hasLabel ? (labelSize.Y > 0f ? labelSize.Y : lineH) : 0f;
+        float totalWidth = boxSize + (hasLabel ? style.ItemSpacing.X + labelWidth : 0f);
+        float totalHeight = MathF.Max(lineH, MathF.Max(boxSize, labelHeight));
+        var totalRect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + totalWidth, cursor.Y + totalHeight);
+        float boxTop = cursor.Y + (totalHeight - boxSize) * 0.5f;
+        var boxRect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, boxTop, cursor.X + boxSize, boxTop + boxSize);
+        context.RegisterItem(id, totalRect);
 
-        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        bool hovered = context.IsMouseHoveringRect(new Vec2(totalRect.MinX, totalRect.MinY), new Vec2(totalRect.MaxX, totalRect.MaxY));
         if (hovered)
         {
             context.SetHoveredId(id);
             context.MarkItemHovered();
         }
+        bool hasFocus = context.FocusedId == id;
 
         bool changed = false;
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
@@ -734,12 +748,19 @@ public static class ImGui
             context.SetActiveId(id);
             context.MarkItemPressed(ImGuiMouseButton.Left);
         }
+
+        bool keyboardToggle = hasFocus && (context.IsKeyJustPressed(ImGuiKey.Space) || context.IsKeyJustPressed(ImGuiKey.Enter));
+        if (keyboardToggle)
+        {
+            context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
+        }
         if (context.ActiveId == id)
         {
             context.MarkItemActive();
-            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
+            if (context.IsMouseJustReleased(ImGuiMouseButton.Left) || keyboardToggle)
             {
-                if (hovered)
+                if (hovered || keyboardToggle)
                 {
                     value = !value;
                     changed = true;
@@ -754,22 +775,30 @@ public static class ImGui
         var hoveredCol = style.GetColor(ImGuiCol.FrameBgHovered);
         var activeCol = style.GetColor(ImGuiCol.FrameBgActive);
         var textColor = style.GetColor(ImGuiCol.Text);
-        var col = (context.ActiveId == id) ? activeCol : (hovered ? hoveredCol : normal);
-        FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(boxSize, boxSize), col);
+        var col = (context.ActiveId == id) ? activeCol : ((hovered || hasFocus) ? hoveredCol : normal);
+        FillRect(new Vec2(boxRect.MinX, boxRect.MinY), new Vec2(boxSize, boxSize), col);
         if (value)
         {
             // simple check: inner smaller filled rect
-            FillRect(new Vec2(rect.MinX + 3, rect.MinY + 3), new Vec2(boxSize - 6, boxSize - 6), textColor);
+            FillRect(new Vec2(boxRect.MinX + 3f, boxRect.MinY + 3f), new Vec2(boxSize - 6f, boxSize - 6f), textColor);
         }
 
         // Draw label to the right
-        if (!string.IsNullOrEmpty(renderLabel))
+        if (hasLabel)
         {
-            var baseline = new Vec2(rect.MaxX + context.Style.ItemSpacing.X, rect.MinY + context.GetAscent());
-            context.AddText(baseline, renderLabel, textColor);
+            float textX = boxRect.MaxX + style.ItemSpacing.X;
+            float textBaseY = cursor.Y + (totalHeight - lineH) * 0.5f + context.GetAscent();
+            context.AddText(new Vec2(textX, textBaseY), renderLabel, textColor);
         }
 
-        context.AdvanceCursor(new Vec2(0f, lineH));
+        if (hasFocus)
+        {
+            var navColor = style.GetColor(ImGuiCol.NavHighlight);
+            var highlightRect = ExpandRect(totalRect, 2f);
+            context.AddRect(highlightRect, navColor, 2f);
+        }
+
+        context.AdvanceCursor(new Vec2(0f, totalHeight));
         return changed;
     }
 
@@ -795,6 +824,7 @@ public static class ImGui
             context.SetHoveredId(id);
             context.MarkItemHovered();
         }
+        bool hasFocus = context.FocusedId == id;
 
         // Begin drag
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
@@ -831,7 +861,7 @@ public static class ImGui
         }
 
         // Keyboard control when active or hovered
-        if (context.ActiveId == id || hovered)
+        if (context.ActiveId == id || hovered || hasFocus)
         {
             var keys = context.GetKeyState();
             float range = max - min;
@@ -886,14 +916,14 @@ public static class ImGui
         var textColor = style.GetColor(ImGuiCol.Text);
 
         var trackCol = context.ActiveId == id ? trackActive : (hovered ? trackHover : trackBase);
+        if (hasFocus && context.ActiveId != id && !hovered)
+        {
+            trackCol = trackHover;
+        }
         FillRect(new Vec2(rect.MinX, rect.MinY + (sz.Y - 8f) * 0.5f), new Vec2(sz.X, 8f), trackCol);
         var tknob = (value - min) / MathF.Max(0.0001f, (max - min));
         var knobX = rect.MinX + 6f + tknob * MathF.Max(1f, (sz.X - 12f));
-        var knobCol = (context.ActiveId == id) ? knobActive : knobBase;
-        if (hovered && context.ActiveId != id)
-        {
-            knobCol = knobActive;
-        }
+        var knobCol = (context.ActiveId == id) ? knobActive : ((hovered || hasFocus) ? knobActive : knobBase);
         FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), knobCol);
 
         // Label & value text
@@ -904,6 +934,13 @@ public static class ImGui
             var baseline = new Vec2(rect.MinX, rect.MinY - context.GetAscent() + sz.Y + context.GetAscent());
             // draw below slider
             context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, textColor);
+        }
+
+        if (hasFocus)
+        {
+            var navColor = style.GetColor(ImGuiCol.NavHighlight);
+            var highlightRect = ExpandRect(rect, 2f);
+            context.AddRect(highlightRect, navColor, 2f);
         }
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
@@ -922,18 +959,36 @@ public static class ImGui
         var cursor = context.CursorPos;
         var lineH = context.GetLineHeight();
         float radius = MathF.Min(lineH * 0.5f, 7f);
-        var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + radius * 2f, cursor.Y + radius * 2f);
-        context.RegisterItem(id, rect);
+        float diameter = radius * 2f;
+        bool hasLabel = !string.IsNullOrEmpty(renderLabel);
+        var labelSize = hasLabel ? CalcTextSize(renderLabel) : Vec2.Zero;
+        float labelWidth = hasLabel ? (labelSize.X > 0f ? labelSize.X : lineH) : 0f;
+        float labelHeight = hasLabel ? (labelSize.Y > 0f ? labelSize.Y : lineH) : 0f;
+        float totalWidth = diameter + (hasLabel ? style.ItemSpacing.X + labelWidth : 0f);
+        float totalHeight = MathF.Max(lineH, MathF.Max(diameter, labelHeight));
+        var totalRect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + totalWidth, cursor.Y + totalHeight);
+        float circleTop = cursor.Y + (totalHeight - diameter) * 0.5f;
+        var circleRect = new ImGuiRect(cursor.X, circleTop, cursor.X + diameter, circleTop + diameter);
+        context.RegisterItem(id, totalRect);
 
-        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        bool hovered = context.IsMouseHoveringRect(new Vec2(totalRect.MinX, totalRect.MinY), new Vec2(totalRect.MaxX, totalRect.MaxY));
         if (hovered)
         {
             context.SetHoveredId(id);
+            context.MarkItemHovered();
         }
+
+        bool hasFocus = context.FocusedId == id;
 
         bool changed = false;
         bool selected = value == option;
+        bool keyboardActivate = hasFocus && (context.IsKeyJustPressed(ImGuiKey.Space) || context.IsKeyJustPressed(ImGuiKey.Enter));
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
+        {
+            context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
+        }
+        if (keyboardActivate)
         {
             context.SetActiveId(id);
             context.MarkItemPressed(ImGuiMouseButton.Left);
@@ -941,14 +996,18 @@ public static class ImGui
         if (context.ActiveId == id)
         {
             context.MarkItemActive();
-            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
+            bool mouseReleased = context.IsMouseJustReleased(ImGuiMouseButton.Left);
+            bool shouldCommit = (mouseReleased && hovered) || keyboardActivate;
+            if (shouldCommit && !selected)
             {
-                if (hovered && !selected)
-                {
-                    value = option;
-                    selected = true;
-                    changed = true;
-                }
+                value = option;
+                selected = true;
+                changed = true;
+                context.MarkItemEdited();
+            }
+
+            if (mouseReleased || keyboardActivate)
+            {
                 context.MarkItemReleased();
                 context.ClearActiveId();
             }
@@ -958,21 +1017,29 @@ public static class ImGui
         var hoverCol = style.GetColor(ImGuiCol.FrameBgHovered);
         var activeCol = style.GetColor(ImGuiCol.FrameBgActive);
         var markCol = style.GetColor(ImGuiCol.CheckMark);
-        var drawColor = context.ActiveId == id ? activeCol : (hovered ? hoverCol : baseCol);
-        var center = new Vec2(cursor.X + radius, cursor.Y + radius);
+        var drawColor = context.ActiveId == id ? activeCol : ((hovered || hasFocus) ? hoverCol : baseCol);
+        var center = new Vec2(circleRect.MinX + radius, circleRect.MinY + radius);
         context.AddCircleFilled(center, radius, drawColor, 16);
         if (selected)
         {
             context.AddCircleFilled(center, MathF.Max(1f, radius * 0.45f), markCol, 12);
         }
 
-        if (!string.IsNullOrEmpty(renderLabel))
+        if (hasLabel)
         {
-            var baseline = new Vec2(rect.MaxX + style.ItemSpacing.X, cursor.Y + context.GetAscent());
-            context.AddText(baseline, renderLabel, style.GetColor(ImGuiCol.Text));
+            float textX = circleRect.MaxX + style.ItemSpacing.X;
+            float textBaseY = cursor.Y + (totalHeight - lineH) * 0.5f + context.GetAscent();
+            context.AddText(new Vec2(textX, textBaseY), renderLabel, style.GetColor(ImGuiCol.Text));
         }
 
-        context.AdvanceCursor(new Vec2(0f, lineH));
+        if (hasFocus)
+        {
+            var navColor = style.GetColor(ImGuiCol.NavHighlight);
+            var highlightRect = ExpandRect(totalRect, 2f);
+            context.AddRect(highlightRect, navColor, 2f);
+        }
+
+        context.AdvanceCursor(new Vec2(0f, totalHeight));
         return changed;
     }
 
@@ -1047,6 +1114,16 @@ public static class ImGui
         }
 
         return 0;
+    }
+
+    private static ImGuiRect ExpandRect(in ImGuiRect rect, float amount)
+    {
+        if (amount <= 0f)
+        {
+            return rect;
+        }
+
+        return new ImGuiRect(rect.MinX - amount, rect.MinY - amount, rect.MaxX + amount, rect.MaxY + amount);
     }
 
     /// <summary>

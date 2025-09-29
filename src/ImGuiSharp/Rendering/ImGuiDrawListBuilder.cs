@@ -62,6 +62,41 @@ internal sealed class ImGuiDrawListBuilder
         _commands.Add(new ImGuiDrawCommand(6, clip, IntPtr.Zero));
     }
 
+    public void AddRect(in ImGuiRect rect, Color color, float thickness)
+    {
+        if (thickness <= 0f)
+        {
+            return;
+        }
+
+        float t = thickness;
+        float minX = rect.MinX;
+        float minY = rect.MinY;
+        float maxX = rect.MaxX;
+        float maxY = rect.MaxY;
+
+        if (minX >= maxX || minY >= maxY)
+        {
+            return;
+        }
+
+        float innerMinX = minX + t;
+        float innerMinY = minY + t;
+        float innerMaxX = maxX - t;
+        float innerMaxY = maxY - t;
+
+        if (innerMinX > innerMaxX) innerMinX = innerMaxX = (minX + maxX) * 0.5f;
+        if (innerMinY > innerMaxY) innerMinY = innerMaxY = (minY + maxY) * 0.5f;
+
+        AddRectFilled(new ImGuiRect(minX, minY, maxX, minY + t), color);
+        AddRectFilled(new ImGuiRect(minX, maxY - t, maxX, maxY), color);
+        if (innerMinY < innerMaxY)
+        {
+            AddRectFilled(new ImGuiRect(minX, innerMinY, minX + t, innerMaxY), color);
+            AddRectFilled(new ImGuiRect(maxX - t, innerMinY, maxX, innerMaxY), color);
+        }
+    }
+
     public void AddQuad(float x0, float y0, float x1, float y1, float u0, float v0, float u1, float v1, Color color)
     {
         if (_vertices.Count > ushort.MaxValue - 4)

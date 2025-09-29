@@ -75,11 +75,17 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
 - Style
   - `ImGuiStyle` exposes spacing/padding and a colour table mirroring Dear ImGui
     defaults (`Text`, `TextDisabled`, `FrameBg` variants, `Button` variants,
-    `CheckMark`, `SliderGrab`, etc.). Widgets source their colours from this palette.
+    `CheckMark`, `SliderGrab`, `NavHighlight`, etc.). Widgets source their
+    colours from this palette and render focus borders using `NavHighlight`.
 - Item queries
   - After each widget submission, `LastItemStatusFlags` tracks hover/active/press
     state. Public helpers mirror Dear ImGui: `ImGui.IsItemHovered/Active/Focused`
     and `ImGui.IsItemClicked`.
+- Navigation
+  - Basic keyboard navigation: Tab/Shift+Tab (and arrow keys) cycle focus across
+    focusable widgets, updating `FocusedId` so `ImGui.IsItemFocused` reflects the
+    current target. Focused widgets render a nav highlight border using the
+    style colour. Full navigation/gamepad handling will follow.
 
 ## Renderer backend (Silk.NET OpenGL)
 
@@ -105,17 +111,21 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
 
 - Checkbox
   - ID derived from label (and ID stack when pushed) guards hover/active state.
-  - Click press on the box activates; release over the box toggles the value.
-  - Visuals: filled box with inner mark when checked; label drawn to the right.
+  - Click press anywhere on the framed region (including the label) activates;
+    release while hovered toggles the value.
+  - Visuals: filled box with inner mark when checked; label drawn to the right;
+    navigation focus draws a highlight border around the full item rect.
 - RadioButton
   - Similar hover/active behaviour; selecting an option assigns the bound value.
   - Visuals: circular frame from `FrameBg` colours with inner dot using
-    `CheckMark` colour when selected.
+    `CheckMark` colour when selected; nav focus highlights the whole row.
 
 - SliderFloat
   - Press within the track activates; horizontal mouse drag maps pixels→value
     with clamping to `[min,max]` and returns `true` on release.
   - Visuals: track + knob; label and formatted value are drawn near the slider.
+  - Focus highlight: keyboard focus draws a nav-coloured frame border around the
+    slider body.
   - Keyboard: default step is `(max-min)/100`; `Shift` multiplies by 10,
     `Ctrl` divides by 10. An optional explicit step overrides the base step.
 - No docking/tables/menus yet.
