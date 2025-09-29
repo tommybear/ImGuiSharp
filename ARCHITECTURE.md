@@ -104,6 +104,8 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - Press within the track activates; horizontal mouse drag maps pixels→value
     with clamping to `[min,max]` and returns `true` on release.
   - Visuals: track + knob; label and formatted value are drawn near the slider.
+  - Keyboard: default step is `(max-min)/100`; `Shift` multiplies by 10,
+    `Ctrl` divides by 10. An optional explicit step overrides the base step.
 - No docking/tables/menus yet.
 - Fonts: ASCII subset baked by default; kerning and wider ranges will be added.
 - Window identity seeds item IDs: window IDs hash the window name combined with

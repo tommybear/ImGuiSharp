@@ -760,7 +760,7 @@ public static class ImGui
     /// <summary>
     /// Slider for a float value. Returns true if the value changed.
     /// </summary>
-    public static bool SliderFloat(string label, ref float value, float min, float max, Vec2? size = null, string? format = null)
+    public static bool SliderFloat(string label, ref float value, float min, float max, Vec2? size = null, string? format = null, float? step = null)
     {
         var context = GetCurrentContext();
         var id = context.GetId(label);
@@ -809,8 +809,30 @@ public static class ImGui
         {
             var keys = context.GetKeyState();
             float range = max - min;
-            float stepSmall = range * 0.01f;
-            float stepLarge = range * 0.10f;
+            float absRange = MathF.Abs(range);
+            float baseStep = step.HasValue ? MathF.Abs(step.Value) : ComputeSliderStep(range, format);
+            if (baseStep <= 0f)
+            {
+                baseStep = absRange > 0f ? absRange / 100f : 0.01f;
+            }
+
+            bool ctrl = keys.IsPressed(Input.ImGuiKey.LeftCtrl) || keys.IsPressed(Input.ImGuiKey.RightCtrl);
+            bool shift = keys.IsPressed(Input.ImGuiKey.LeftShift) || keys.IsPressed(Input.ImGuiKey.RightShift);
+
+            float stepSmall = baseStep;
+            float stepLarge = baseStep * 10f;
+
+            if (ctrl)
+            {
+                stepSmall /= 10f;
+                stepLarge /= 10f;
+            }
+
+            if (shift)
+            {
+                stepSmall *= 10f;
+                stepLarge *= 10f;
+            }
 
             float v0 = value;
             if (keys.IsPressed(Input.ImGuiKey.Left)) value -= stepSmall;
@@ -855,6 +877,70 @@ public static class ImGui
     }
 
     private static float Clamp01(float v) => (v < 0f) ? 0f : (v > 1f ? 1f : v);
+
+    private static float ComputeSliderStep(float range, string? format)
+    {
+        float absRange = MathF.Abs(range);
+        int precision = GetDecimalPrecision(format);
+        if (precision <= 0)
+        {
+            if (absRange != 0f && absRange <= 100f)
+            {
+                return 1f;
+            }
+            if (absRange > 0f)
+            {
+                return absRange / 100f;
+            }
+            return 1f;
+        }
+
+        return absRange > 0f ? absRange / 100f : MathF.Pow(10f, -precision);
+    }
+
+    private static int GetDecimalPrecision(string? format)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            return 2;
+        }
+
+        int dot = format.LastIndexOf('.');
+        if (dot >= 0)
+        {
+            int count = 0;
+            for (int i = dot + 1; i < format.Length; i++)
+            {
+                char c = format[i];
+                if (char.IsDigit(c))
+                {
+                    count++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return count;
+        }
+
+        int idx = format.IndexOf('F');
+        if (idx < 0)
+        {
+            idx = format.IndexOf('f');
+        }
+        if (idx >= 0 && idx + 1 < format.Length && char.IsDigit(format[idx + 1]))
+        {
+            int precision = 0;
+            for (int i = idx + 1; i < format.Length && char.IsDigit(format[i]); i++)
+            {
+                precision = (precision * 10) + (format[i] - '0');
+            }
+            return precision;
+        }
+
+        return 0;
+    }
 
     /// <summary>
     /// Sets a clip rectangle for subsequent draw calls. Use PopClipRect to restore.
