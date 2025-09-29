@@ -33,6 +33,7 @@ public sealed class SliderFloatParityTests
 
         Assert.True(changed);
         Assert.True(v > 0.0f);
+        Assert.True(ImGui.IsItemActive());
 
         ImGui.SetCurrentContext(null);
     }
@@ -83,6 +84,8 @@ public sealed class SliderFloatParityTests
         ctx.SetKeyState(ImGuiKey.End, false);
         Assert.True(changed);
         Assert.Equal(1f, v, 3);
+        Assert.True(ImGui.IsItemHovered());
+        Assert.False(ImGui.IsItemActive());
 
         // Try increasing beyond max: should clamp and not change further
         ctx.NewFrame();

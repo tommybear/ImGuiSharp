@@ -187,16 +187,19 @@ public static class ImGui
         if (isHovered)
         {
             context.SetHoveredId(id);
+            context.MarkItemHovered();
         }
 
         var pressed = false;
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && isHovered)
         {
             context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
         }
 
         if (context.ActiveId == id)
         {
+            context.MarkItemActive();
             if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
             {
                 if (isHovered)
@@ -204,6 +207,7 @@ public static class ImGui
                     pressed = true;
                 }
 
+                context.MarkItemReleased();
                 context.ClearActiveId();
             }
         }
@@ -232,8 +236,13 @@ public static class ImGui
         {
             var textMin = new Vec2(cursor.X + framePadding.X, cursor.Y + framePadding.Y);
             var textMax = new Vec2(rectMax.X - framePadding.X, rectMax.Y - framePadding.Y);
-            var textPos = CalculateAlignedBaseline(textMin, textMax, textWidth, lineHeight, context.GetAscent(), style.ButtonTextAlign);
-            context.AddText(textPos, renderLabel, style.GetColor(ImGuiCol.Text));
+            var available = new Vec2(MathF.Max(0f, textMax.X - textMin.X), MathF.Max(0f, textMax.Y - textMin.Y));
+            var align = style.ButtonTextAlign;
+            var posX = textMin.X + (available.X - textWidth) * align.X;
+            posX = MathF.Max(posX, textMin.X);
+            var baselineY = textMin.Y + (available.Y - lineHeight) * align.Y + context.GetAscent();
+            baselineY = MathF.Max(baselineY, textMin.Y + context.GetAscent());
+            context.AddText(new Vec2(posX, baselineY), renderLabel, style.GetColor(ImGuiCol.Text));
         }
 
         context.AdvanceCursor(actualSize);
@@ -716,15 +725,18 @@ public static class ImGui
         if (hovered)
         {
             context.SetHoveredId(id);
+            context.MarkItemHovered();
         }
 
         bool changed = false;
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
         {
             context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
         }
         if (context.ActiveId == id)
         {
+            context.MarkItemActive();
             if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
             {
                 if (hovered)
@@ -732,6 +744,7 @@ public static class ImGui
                     value = !value;
                     changed = true;
                 }
+                context.MarkItemReleased();
                 context.ClearActiveId();
             }
         }
@@ -777,18 +790,24 @@ public static class ImGui
         context.RegisterItem(id, rect);
 
         bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
-        if (hovered) context.SetHoveredId(id);
+        if (hovered)
+        {
+            context.SetHoveredId(id);
+            context.MarkItemHovered();
+        }
 
         // Begin drag
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
         {
             context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
         }
 
         bool changed = false;
         // While dragging, map mouse X to value
         if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
         {
+            context.MarkItemActive();
             var mx = GetCurrentContext().IO.MousePosition.X;
             var left = rect.MinX + 6f; // padding
             var right = rect.MaxX - 6f;
@@ -806,6 +825,7 @@ public static class ImGui
         bool released = context.ActiveId == id && context.IsMouseJustReleased(ImGuiMouseButton.Left);
         if (released)
         {
+            context.MarkItemReleased();
             context.ClearActiveId();
         }
 
@@ -911,9 +931,11 @@ public static class ImGui
         if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
         {
             context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
         }
         if (context.ActiveId == id)
         {
+            context.MarkItemActive();
             if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
             {
                 if (hovered && !selected)
@@ -922,6 +944,7 @@ public static class ImGui
                     selected = true;
                     changed = true;
                 }
+                context.MarkItemReleased();
                 context.ClearActiveId();
             }
         }
@@ -1021,16 +1044,6 @@ public static class ImGui
         return 0;
     }
 
-    private static Vec2 CalculateAlignedBaseline(Vec2 min, Vec2 max, float textWidth, float lineHeight, float ascent, Vec2 align)
-    {
-        var available = new Vec2(MathF.Max(0f, max.X - min.X), MathF.Max(0f, max.Y - min.Y));
-        float posX = min.X + (available.X - textWidth) * align.X;
-        posX = MathF.Max(posX, min.X);
-        float posY = min.Y + (available.Y - lineHeight) * align.Y;
-        posY = MathF.Max(posY, min.Y);
-        return new Vec2(posX, posY + ascent);
-    }
-
     /// <summary>
     /// Sets a clip rectangle for subsequent draw calls. Use PopClipRect to restore.
     /// </summary>
@@ -1085,6 +1098,52 @@ public static class ImGui
     public static void EndChild()
     {
         GetCurrentContext().EndWindow();
+    }
+
+    public static bool IsItemHovered()
+    {
+        var ctx = GetCurrentContext();
+        if (ctx.LastItemId == 0)
+        {
+            return false;
+        }
+        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Hovered) != 0;
+    }
+
+    public static bool IsItemActive()
+    {
+        var ctx = GetCurrentContext();
+        if (ctx.LastItemId == 0)
+        {
+            return false;
+        }
+        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Active) != 0;
+    }
+
+    public static bool IsItemFocused()
+    {
+        var ctx = GetCurrentContext();
+        if (ctx.LastItemId == 0)
+        {
+            return false;
+        }
+        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Focused) != 0;
+    }
+
+    public static bool IsItemClicked(ImGuiMouseButton button = ImGuiMouseButton.Left)
+    {
+        var ctx = GetCurrentContext();
+        if (ctx.LastItemId == 0)
+        {
+            return false;
+        }
+
+        if (ctx.LastItemPressedButton != button)
+        {
+            return false;
+        }
+
+        return (ctx.LastItemStatusFlags & ImGuiItemStatusFlags.Released) != 0;
     }
 
 }

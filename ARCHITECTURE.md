@@ -76,6 +76,10 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - `ImGuiStyle` exposes spacing/padding and a colour table mirroring Dear ImGui
     defaults (`Text`, `TextDisabled`, `FrameBg` variants, `Button` variants,
     `CheckMark`, `SliderGrab`, etc.). Widgets source their colours from this palette.
+- Item queries
+  - After each widget submission, `LastItemStatusFlags` tracks hover/active/press
+    state. Public helpers mirror Dear ImGui: `ImGui.IsItemHovered/Active/Focused`
+    and `ImGui.IsItemClicked`.
 
 ## Renderer backend (Silk.NET OpenGL)
 

@@ -83,6 +83,9 @@ public sealed class ButtonTests : IDisposable
 
         Assert.True(pressed);
         Assert.Equal(0u, _context.ActiveId);
+        Assert.True(ImGui.IsItemHovered());
+        Assert.False(ImGui.IsItemActive());
+        Assert.True(ImGui.IsItemClicked());
     }
 
     [Fact]

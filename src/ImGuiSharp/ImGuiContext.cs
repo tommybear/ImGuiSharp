@@ -85,6 +85,13 @@ public sealed class ImGuiContext
     public ImGuiRect LastItemRect { get; private set; }
 
     /// <summary>
+    /// Gets flags describing the state of the most recently submitted item.
+    /// </summary>
+    public ImGuiItemStatusFlags LastItemStatusFlags { get; private set; }
+
+    public ImGuiMouseButton LastItemPressedButton { get; private set; }
+
+    /// <summary>
     /// Gets the current cursor position used for automatic layout.
     /// </summary>
     public Vec2 CursorPos => _cursorPos;
@@ -103,6 +110,8 @@ public sealed class ImGuiContext
         HoveredId = 0;
         LastItemId = 0;
         LastItemRect = default;
+        LastItemStatusFlags = ImGuiItemStatusFlags.None;
+        LastItemPressedButton = ImGuiMouseButton.Left;
         IO.MouseWheel = _pendingMouseWheelY;
         IO.MouseWheelH = _pendingMouseWheelX;
         _pendingMouseWheelX = 0f;
@@ -413,6 +422,42 @@ public sealed class ImGuiContext
     {
         LastItemId = id;
         LastItemRect = rect;
+        LastItemStatusFlags = ImGuiItemStatusFlags.None;
+    }
+
+    internal void UpdateItemStatusFlags(bool hovered, bool held, bool pressed, bool released, bool focused)
+    {
+        var flags = ImGuiItemStatusFlags.None;
+        if (hovered) flags |= ImGuiItemStatusFlags.Hovered;
+        if (held) flags |= ImGuiItemStatusFlags.Held;
+        if (pressed) flags |= ImGuiItemStatusFlags.Pressed;
+        if (released) flags |= ImGuiItemStatusFlags.Released;
+        if (ActiveId == LastItemId) flags |= ImGuiItemStatusFlags.Active;
+        if (focused) flags |= ImGuiItemStatusFlags.Focused;
+        LastItemStatusFlags |= flags;
+    }
+
+    internal void MarkItemActive()
+    {
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Active | ImGuiItemStatusFlags.Held;
+    }
+
+    internal void MarkItemHovered()
+    {
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Hovered;
+    }
+
+    internal void MarkItemPressed(ImGuiMouseButton button)
+    {
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Pressed | ImGuiItemStatusFlags.Held | ImGuiItemStatusFlags.Active;
+        LastItemPressedButton = button;
+    }
+
+    internal void MarkItemReleased()
+    {
+        LastItemStatusFlags |= ImGuiItemStatusFlags.Released;
+        LastItemStatusFlags &= ~ImGuiItemStatusFlags.Held;
+        LastItemStatusFlags &= ~ImGuiItemStatusFlags.Active;
     }
 
     internal bool IsMouseHoveringRect(Vec2 min, Vec2 max)
