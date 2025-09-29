@@ -851,6 +851,11 @@ public sealed class ImGuiContext
 
     private void ProcessNavigation()
     {
+        if (ActiveId != 0)
+        {
+            return;
+        }
+
         if (_focusableItems.Count == 0)
         {
             return;

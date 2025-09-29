@@ -35,6 +35,10 @@ var mouseScroll = new Vec2(0f, 0f);
 bool[] demoChecks = Enumerable.Repeat(false, 32).ToArray();
 float[] demoValues = Enumerable.Repeat(0.5f, 32).ToArray();
 int mode = 0;
+string userName = "ImGuiSharp";
+string commandLine = string.Empty;
+string notes = "Use Tab here to insert\ta tab.";
+string status = string.Empty;
 
 // Use raw input for hit-testing to avoid input-lag induced mis-clicks
 
@@ -129,6 +133,46 @@ window.Update += deltaTime =>
 
     // Demonstrate Label helper (absolute position, not affecting cursor)
     ImGui.Label("Hello, ImGuiSharp!", new Vec2(40f, 300f));
+
+    ImGui.SetCursorPos(new Vec2(40f, 340f));
+    ImGui.SeparatorText("Text Input");
+
+    ImGui.SetCursorPos(new Vec2(40f, 370f));
+    if (ImGui.InputText("Name", ref userName, 64, ImGuiInputTextFlags.AutoSelectAll))
+    {
+        status = $"Name updated to '{userName}'.";
+    }
+
+    ImGui.SetCursorPos(new Vec2(40f, 410f));
+    var commandBefore = commandLine;
+    bool commandResult = ImGui.InputText("Command", ref commandLine, 128, ImGuiInputTextFlags.EnterReturnsTrue);
+    if (commandResult)
+    {
+        if (context.ActiveId == 0)
+        {
+            if (!string.IsNullOrWhiteSpace(commandBefore))
+            {
+                status = $"Command submitted: {commandBefore}";
+            }
+            commandLine = string.Empty;
+        }
+        else
+        {
+            status = $"Editing command: {commandLine}";
+        }
+    }
+
+    ImGui.SetCursorPos(new Vec2(40f, 450f));
+    if (ImGui.InputText("Notes", ref notes, 256, ImGuiInputTextFlags.AllowTabInput))
+    {
+        status = "Notes edited.";
+    }
+
+    if (!string.IsNullOrEmpty(status))
+    {
+        ImGui.SetCursorPos(new Vec2(40f, 490f));
+        ImGui.Text(status);
+    }
 
     // Scrollable region demo
     // Scrollable region using BeginChild/EndChild
@@ -227,6 +271,12 @@ ImGuiKey? TryMapKey(Key key) => key switch
     Key.Right => ImGuiKey.Right,
     Key.Up => ImGuiKey.Up,
     Key.Down => ImGuiKey.Down,
+    Key.Delete => ImGuiKey.Delete,
+    Key.Home => ImGuiKey.Home,
+    Key.End => ImGuiKey.End,
+    Key.PageUp => ImGuiKey.PageUp,
+    Key.PageDown => ImGuiKey.PageDown,
+    Key.KeypadEnter => ImGuiKey.KeypadEnter,
     Key.Number0 => ImGuiKey.D0,
     Key.Number1 => ImGuiKey.D1,
     Key.Number2 => ImGuiKey.D2,
