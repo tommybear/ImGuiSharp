@@ -24,38 +24,56 @@ purely for comparison while we build feature parity.
 
 ### Feature Parity Snapshot
 
+Legend: ✔ implemented · ✗ not yet · ◑ partial/limited
+
 | Category | Feature | Dear ImGui | ImGuiSharp | Notes |
 |----------|---------|------------|------------|-------|
-| Core | Context creation & switching | ✔ | ✔ | `ImGuiContext`, `ImGui.SetCurrentContext` |
-| Core | Frame lifecycle (`NewFrame/EndFrame`) | ✔ | ✔ | Matches IO/timing semantics |
-| Core | Draw data (`ImDrawData`) | ✔ | ✔ | Single aggregated draw list |
-| Core | ID stack & hashing | ✔ | ✔ | Window-seeded IDs, `PushID/PopID` |
-| Core | Item query API (`IsItemHovered/Active/...`) | ✔ | ✔ | Includes `IsItemDeactivatedAfterEdit` |
-| Input | Mouse position/buttons/wheel | ✔ | ✔ | Via `ImGui.SetMousePosition/SetMouseButtonState/AddMouseWheel` |
-| Input | Keyboard state (keys, modifier detection) | ✔ | ✔ | `ImGui.SetKeyState`, modifier queries |
-| Text & Fonts | Font atlas baking | ✔ | ✔ | Embedded Proggy Clean via stb_truetype |
-| Text & Fonts | Text rendering (`Text`, `Label`, `TextWrapped`) | ✔ | ✔ | Wrapping, kerning, width cache |
-| Widgets | Button | ✔ | ✔ | Style colours, keyboard activation |
-| Widgets | Checkbox | ✔ | ✔ | Style colours, boolean toggle |
-| Widgets | RadioButton | ✔ | ✔ | Circular frame + check mark |
-| Widgets | SliderFloat | ✔ | ✔ | Mouse drag + keyboard modifiers/step |
-| Widgets | Separator / SeparatorText | ✔ | ✔ | Style colours, centered text |
-| Widgets | Text inputs (`InputText`) | ✔ | ✖ | Planned |
-| Widgets | Drag widgets (`DragFloat`, etc.) | ✔ | ✖ | Planned |
-| Layout | `SameLine`, `Spacing`, `NewLine` | ✔ | ✔ | Style spacing aware |
-| Layout | Child windows (`BeginChild/EndChild`) | ✔ | ✔ | Scrollable regions + clamping |
-| Layout | Window stack (`Begin/End`) | ✔ | ✔ | Basic window container (no title bars yet) |
-| Layout | Columns/Table API | ✔ | ✖ | Not implemented |
-| Navigation | Keyboard/gamepad navigation & focus | ✔ | ✖ | Focus tracking only; nav TBD |
-| Navigation | Item activation via keyboard | ✔ | Partial | Buttons/slider support; full nav pending |
-| Style | Colour palette | ✔ | ✔ | `ImGuiStyle.SetColor` covering core slots |
-| Style | Style variables (padding, spacing, rounding) | ✔ | Partial | Item spacing/padding/text align only |
-| Style | Fonts configurable | ✔ | Partial | Single embedded font; external fonts TBD |
-| Advanced | Docking | ✔ | ✖ | Future milestone |
-| Advanced | Tables/headers/menus | ✔ | ✖ | Future milestone |
-| Advanced | Multi-viewport | ✔ | ✖ | Not planned yet |
-| Backend | Rendering abstraction | ✔ | ✔ | Silk.NET OpenGL implementation |
-| Backend | Multi-backend support | ✔ | Partial | Only OpenGL provider today |
+| **Core Runtime** | Multiple contexts & switching | ✔ | ✔ | `ImGuiContext`, `ImGui.SetCurrentContext` |
+| | Frame lifecycle (`NewFrame/EndFrame`) | ✔ | ✔ | IO, delta time, frame timers |
+| | Draw data (`ImDrawData`) | ✔ | ✔ | Single aggregated draw list per frame |
+| | Multi-draw list support | ✔ | ◑ | One combined draw list today |
+| | ID stack & hashing | ✔ | ✔ | Window-seeded IDs, `PushID/PopID` |
+| | Item query API (`IsItemHovered/Active/...`) | ✔ | ✔ | Includes `IsItemDeactivatedAfterEdit` |
+| | Item snippets (`IsItemToggledOpen` etc.) | ✔ | ✗ | Pending |
+| **Input** | Mouse position/buttons/wheel | ✔ | ✔ | `SetMousePosition`, `SetMouseButtonState`, `AddMouseWheel` |
+| | Keyboard state & modifiers | ✔ | ✔ | `SetKeyState`, modifier detection |
+| | Input queue (`AddInputEvent`) | ✔ | ✔ | Basic event forwarding |
+| | Gamepad navigation | ✔ | ✗ | Not implemented |
+| **Text & Fonts** | Embedded font atlas | ✔ | ✔ | Proggy Clean via stb_truetype |
+| | External font loading | ✔ | ✗ | Future work |
+| | Kerning & width measurement | ✔ | ✔ | ASCII kerning, width cache |
+| | Text helpers (`Text`, `Label`, `TextWrapped`, `CalcTextSize`) | ✔ | ✔ | Wrap width via content region |
+| **Widgets** | Button / Checkbox / Radio | ✔ | ✔ | Style-driven visuals |
+| | SliderFloat | ✔ | ✔ | Mouse drag + keyboard modifiers/step |
+| | Separator / SeparatorText | ✔ | ✔ | Centered labels, style colours |
+| | ProgressBar | ✔ | ✗ | Planned |
+| | Combo/Selectables | ✔ | ✗ | Planned |
+| | InputText | ✔ | ✗ | Planned |
+| | Drag widgets (`DragFloat`, etc.) | ✔ | ✗ | Planned |
+| | Tree nodes / collapsing headers | ✔ | ✗ | Planned |
+| | Menus / MenuBar / Popup | ✔ | ✗ | Planned |
+| **Layout** | `SameLine`, `Spacing`, `NewLine` | ✔ | ✔ | Style spacing aware |
+| | Child windows (`BeginChild/EndChild`) | ✔ | ✔ | Scrollable regions + persistent scroll |
+| | Window containers (`Begin/End`) | ✔ | ✔ | Basic window stack (no title bars yet) |
+| | Columns, tables, layout helpers | ✔ | ✗ | Future milestone |
+| | Multi-viewport/platform windows | ✔ | ✗ | Not yet planned |
+| **Navigation & Focus** | Hover/focus state reporting | ✔ | ✔ | Item status flags |
+| | Keyboard navigation | ✔ | ✗ | Focus tracking only; nav TBD |
+| | Gamepad navigation | ✔ | ✗ | Not implemented |
+| **Style** | Colour palette editing | ✔ | ✔ | `ImGuiStyle.SetColor` for core slots |
+| | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✔ | ◑ | Padding/spacing/text align exposed; style stacks pending |
+| | Style stacks (`PushStyleVar/Color`) | ✔ | ✗ | Not implemented |
+| | Theme editing helpers (`ImGui::StyleColors*`) | ✔ | ✗ | To be added |
+| **Text/Item Queries** | Deactivated/AfterEdit / Active status | ✔ | ✔ | Per-item status flags |
+| | Storage queries (`GetItemRect`, etc.) | ✔ | ◑ | Rect via `LastItemRect`; more helpers pending |
+| **Rendering Backend** | Draw command submission | ✔ | ✔ | Silk.NET OpenGL reference backend |
+| | Texture registration | ✔ | ✔ | `RegisterTexture/UnregisterTexture` |
+| | Multi-backend abstraction | ✔ | ◑ | Interface defined; additional backends TBD |
+| | Software renderer | ✔ | ✗ | Not implemented |
+| **Advanced Features** | Docking | ✔ | ✗ | Future milestone |
+| | Tables API | ✔ | ✗ | Planned |
+| | Menus & popups | ✔ | ✗ | Planned |
+| | ImPlot/ImNodes integrations | ✔ | ✗ | Out of scope for now |
 
 
 See TODO.md and MILESTONE.md for roadmap and status.
