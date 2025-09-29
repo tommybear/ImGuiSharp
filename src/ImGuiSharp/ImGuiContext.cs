@@ -20,6 +20,8 @@ public sealed class ImGuiContext
     private readonly Dictionary<ImGuiKey, bool> _keyStates = new();
     private readonly Dictionary<ImGuiKey, bool> _keyStatesPrev = new();
     private readonly Stack<uint> _idStack = new();
+    private readonly Stack<StyleColorMod> _colorStack = new();
+    private readonly Stack<StyleVarMod> _styleVarStack = new();
     private readonly ImGuiDrawListBuilder _drawListBuilder = new();
     private readonly List<uint> _focusableItems = new();
 
@@ -309,6 +311,100 @@ public sealed class ImGuiContext
         }
 
         _idStack.Pop();
+    }
+
+    internal void PushStyleColor(ImGuiCol idx, Color color)
+    {
+        _colorStack.Push(new StyleColorMod(idx, Style.GetColor(idx)));
+        Style.SetColor(idx, color);
+    }
+
+    internal void PopStyleColor(int count)
+    {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count));
+        }
+
+        while (count-- > 0)
+        {
+            if (_colorStack.Count == 0)
+            {
+                throw new InvalidOperationException("PopStyleColor called without matching PushStyleColor.");
+            }
+
+            var mod = _colorStack.Pop();
+            Style.SetColor(mod.Index, mod.Backup);
+        }
+    }
+
+    internal void PushStyleVar(ImGuiStyleVar idx, in Vec2 value)
+    {
+        switch (idx)
+        {
+            case ImGuiStyleVar.ItemSpacing:
+                _styleVarStack.Push(StyleVarMod.FromVec2(idx, Style.ItemSpacing));
+                Style.ItemSpacing = value;
+                break;
+            case ImGuiStyleVar.FramePadding:
+                _styleVarStack.Push(StyleVarMod.FromVec2(idx, Style.FramePadding));
+                Style.FramePadding = value;
+                break;
+            case ImGuiStyleVar.ButtonTextAlign:
+                _styleVarStack.Push(StyleVarMod.FromVec2(idx, Style.ButtonTextAlign));
+                Style.ButtonTextAlign = value;
+                break;
+            default:
+                throw new ArgumentException($"Style variable {idx} expects a float value.", nameof(idx));
+        }
+    }
+
+    internal void PushStyleVar(ImGuiStyleVar idx, float value)
+    {
+        switch (idx)
+        {
+            case ImGuiStyleVar.FrameBorderSize:
+                _styleVarStack.Push(StyleVarMod.FromFloat(idx, Style.FrameBorderSize));
+                Style.FrameBorderSize = value;
+                break;
+            default:
+                throw new ArgumentException($"Style variable {idx} expects a Vec2 value.", nameof(idx));
+        }
+    }
+
+    internal void PopStyleVar(int count)
+    {
+        if (count < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(count));
+        }
+
+        while (count-- > 0)
+        {
+            if (_styleVarStack.Count == 0)
+            {
+                throw new InvalidOperationException("PopStyleVar called without matching PushStyleVar.");
+            }
+
+            var mod = _styleVarStack.Pop();
+            switch (mod.Index)
+            {
+                case ImGuiStyleVar.ItemSpacing:
+                    Style.ItemSpacing = mod.BackupVec2;
+                    break;
+                case ImGuiStyleVar.FramePadding:
+                    Style.FramePadding = mod.BackupVec2;
+                    break;
+                case ImGuiStyleVar.ButtonTextAlign:
+                    Style.ButtonTextAlign = mod.BackupVec2;
+                    break;
+                case ImGuiStyleVar.FrameBorderSize:
+                    Style.FrameBorderSize = mod.BackupFloat;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unhandled style var {mod.Index}.");
+            }
+        }
     }
 
     internal void SetHoveredId(uint id)
@@ -811,5 +907,37 @@ public sealed class ImGuiContext
         public float StartMouseY;
         public float StartScrollY;
         public uint Id;
+    }
+
+    private readonly struct StyleColorMod
+    {
+        public StyleColorMod(ImGuiCol index, Color backup)
+        {
+            Index = index;
+            Backup = backup;
+        }
+
+        public ImGuiCol Index { get; }
+        public Color Backup { get; }
+    }
+
+    private readonly struct StyleVarMod
+    {
+        private StyleVarMod(ImGuiStyleVar index, Vec2 backupVec2, float backupFloat, bool isVec2)
+        {
+            Index = index;
+            BackupVec2 = backupVec2;
+            BackupFloat = backupFloat;
+            IsVec2 = isVec2;
+        }
+
+        public ImGuiStyleVar Index { get; }
+        public Vec2 BackupVec2 { get; }
+        public float BackupFloat { get; }
+        public bool IsVec2 { get; }
+
+        public static StyleVarMod FromVec2(ImGuiStyleVar index, Vec2 value) => new(index, value, 0f, true);
+
+        public static StyleVarMod FromFloat(ImGuiStyleVar index, float value) => new(index, Vec2.Zero, value, false);
     }
 }

@@ -79,6 +79,8 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
     colours from this palette and render focus borders using `NavHighlight`.
     `FrameBorderSize` controls optional borders drawn around frame widgets when
     non-zero, matching Dear ImGui's `style.FrameBorderSize`.
+  - Style stacks (`PushStyleColor/Var` + `PopStyleColor/Var`) are implemented
+    for the currently exposed slots, mirroring Dear ImGui's behaviour.
 - Item queries
   - After each widget submission, `LastItemStatusFlags` tracks hover/active/press
     state. Public helpers mirror Dear ImGui: `ImGui.IsItemHovered/Active/Focused`

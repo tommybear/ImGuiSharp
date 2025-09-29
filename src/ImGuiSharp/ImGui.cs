@@ -1173,6 +1173,21 @@ public static class ImGui
         context.AddRectFilled(rect, color);
     }
 
+    /// <summary>Pushes a temporary colour override onto the style stack.</summary>
+    public static void PushStyleColor(ImGuiCol idx, Color color) => GetCurrentContext().PushStyleColor(idx, color);
+
+    /// <summary>Pops one or more previously pushed style colours.</summary>
+    public static void PopStyleColor(int count = 1) => GetCurrentContext().PopStyleColor(count);
+
+    /// <summary>Pushes a temporary Vec2 style override.</summary>
+    public static void PushStyleVar(ImGuiStyleVar idx, Vec2 value) => GetCurrentContext().PushStyleVar(idx, value);
+
+    /// <summary>Pushes a temporary float style override.</summary>
+    public static void PushStyleVar(ImGuiStyleVar idx, float value) => GetCurrentContext().PushStyleVar(idx, value);
+
+    /// <summary>Pops one or more previously pushed style variables.</summary>
+    public static void PopStyleVar(int count = 1) => GetCurrentContext().PopStyleVar(count);
+
     /// <summary>
     /// Begins a window at an absolute position and size. Call End() to close.
     /// </summary>
