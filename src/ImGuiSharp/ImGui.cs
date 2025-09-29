@@ -167,10 +167,18 @@ public static class ImGui
         ArgumentNullException.ThrowIfNull(label);
 
         var context = GetCurrentContext();
+        var style = context.Style;
+        var framePadding = style.FramePadding;
         var id = context.GetId(label);
         var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
-        var actualSize = size ?? DefaultButtonSize;
+        var lineHeight = context.GetLineHeight();
+        float textWidth = string.IsNullOrEmpty(renderLabel) ? 0f : context.MeasureTextWidth(renderLabel);
+        var defaultSize = new Vec2(textWidth + framePadding.X * 2f, lineHeight + framePadding.Y * 2f);
+        defaultSize = new Vec2(
+            MathF.Max(defaultSize.X, DefaultButtonSize.X),
+            MathF.Max(defaultSize.Y, DefaultButtonSize.Y));
+        var actualSize = size ?? defaultSize;
         var rectMax = cursor + actualSize;
         var rect = new ImGuiRect(cursor.X, cursor.Y, rectMax.X, rectMax.Y);
         context.RegisterItem(id, rect);
@@ -200,9 +208,9 @@ public static class ImGui
             }
         }
 
-        var normal = new Color(0.20f, 0.22f, 0.27f);
-        var hovered = new Color(0.28f, 0.30f, 0.36f);
-        var active = new Color(0.33f, 0.36f, 0.43f);
+        var normal = style.GetColor(ImGuiCol.Button);
+        var hovered = style.GetColor(ImGuiCol.ButtonHovered);
+        var active = style.GetColor(ImGuiCol.ButtonActive);
 
         Color drawColor;
         if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
@@ -222,17 +230,10 @@ public static class ImGui
         // Draw label text if default font is set
         if (!string.IsNullOrEmpty(renderLabel))
         {
-            var textWidth = context.MeasureTextWidth(renderLabel);
-            var fontLine = 16f; // fallback if no font
-            var atlasField = typeof(ImGuiContext).GetField("_fontAtlas", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            if (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas atlas)
-            {
-                fontLine = atlas.LineHeight;
-            }
-            var textPos = new Vec2(
-                cursor.X + (actualSize.X - textWidth) * 0.5f,
-                cursor.Y + (actualSize.Y - fontLine) * 0.5f + (atlasField?.GetValue(context) is ImGuiSharp.Fonts.FontAtlas a ? a.Ascent : 0f));
-            context.AddText(textPos, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            var textMin = new Vec2(cursor.X + framePadding.X, cursor.Y + framePadding.Y);
+            var textMax = new Vec2(rectMax.X - framePadding.X, rectMax.Y - framePadding.Y);
+            var textPos = CalculateAlignedBaseline(textMin, textMax, textWidth, lineHeight, context.GetAscent(), style.ButtonTextAlign);
+            context.AddText(textPos, renderLabel, style.GetColor(ImGuiCol.Text));
         }
 
         context.AdvanceCursor(actualSize);
@@ -251,7 +252,7 @@ public static class ImGui
 
         var context = GetCurrentContext();
         var baseline = new Vec2(context.CursorPos.X, context.CursorPos.Y + context.GetAscent());
-        context.AddText(baseline, text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        context.AddText(baseline, text, context.Style.GetColor(ImGuiCol.Text));
         context.AdvanceCursor(new Vec2(0f, context.GetLineHeight()));
     }
 
@@ -267,7 +268,7 @@ public static class ImGui
 
         var context = GetCurrentContext();
         var baseline = new Vec2(position.X, position.Y + context.GetAscent());
-        context.AddText(baseline, text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        context.AddText(baseline, text, context.Style.GetColor(ImGuiCol.Text));
     }
 
     /// <summary>
@@ -330,7 +331,7 @@ public static class ImGui
 
         var thickness = 1f;
         var rect = new ImGuiRect(start.X, y - thickness * 0.5f, end.X, y + thickness * 0.5f);
-        ctx.AddRectFilled(rect, new ImGuiSharp.Math.Color(0.43f, 0.43f, 0.50f, 1f));
+        ctx.AddRectFilled(rect, ctx.Style.GetColor(ImGuiCol.Separator));
         ctx.RegisterItem(0, rect);
         ctx.AdvanceCursor(new Vec2(0f, thickness + spacing.Y));
     }
@@ -360,7 +361,7 @@ public static class ImGui
         float padding = 6f;
         float thickness = 1f;
         float lineY = cursor.Y + lineHeight * 0.5f;
-        var lineColor = new ImGuiSharp.Math.Color(0.43f, 0.43f, 0.50f, 1f);
+        var lineColor = ctx.Style.GetColor(ImGuiCol.Separator);
 
         float textStart = startX;
         if (textWidth + padding * 2f <= available)
@@ -375,7 +376,7 @@ public static class ImGui
         }
 
         var textPos = new Vec2(textStart, cursor.Y + ascent);
-        ctx.AddText(textPos, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+        ctx.AddText(textPos, renderLabel, ctx.Style.GetColor(ImGuiCol.Text));
 
         float rightStart = textStart + textWidth + padding;
         if (rightStart < maxX)
@@ -702,6 +703,7 @@ public static class ImGui
     public static bool Checkbox(string label, ref bool value)
     {
         var context = GetCurrentContext();
+        var style = context.Style;
         var id = context.GetId(label);
         var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
@@ -735,22 +737,23 @@ public static class ImGui
         }
 
         // Draw box
-        var normal = new ImGuiSharp.Math.Color(0.20f, 0.22f, 0.27f, 1f);
-        var hoveredCol = new ImGuiSharp.Math.Color(0.28f, 0.30f, 0.36f, 1f);
-        var activeCol = new ImGuiSharp.Math.Color(0.33f, 0.36f, 0.43f, 1f);
+        var normal = style.GetColor(ImGuiCol.FrameBg);
+        var hoveredCol = style.GetColor(ImGuiCol.FrameBgHovered);
+        var activeCol = style.GetColor(ImGuiCol.FrameBgActive);
+        var textColor = style.GetColor(ImGuiCol.Text);
         var col = (context.ActiveId == id) ? activeCol : (hovered ? hoveredCol : normal);
         FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(boxSize, boxSize), col);
         if (value)
         {
             // simple check: inner smaller filled rect
-            FillRect(new Vec2(rect.MinX + 3, rect.MinY + 3), new Vec2(boxSize - 6, boxSize - 6), new ImGuiSharp.Math.Color(0.9f, 0.9f, 0.95f, 1f));
+            FillRect(new Vec2(rect.MinX + 3, rect.MinY + 3), new Vec2(boxSize - 6, boxSize - 6), textColor);
         }
 
         // Draw label to the right
         if (!string.IsNullOrEmpty(renderLabel))
         {
             var baseline = new Vec2(rect.MaxX + context.Style.ItemSpacing.X, rect.MinY + context.GetAscent());
-            context.AddText(baseline, renderLabel, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            context.AddText(baseline, renderLabel, textColor);
         }
 
         context.AdvanceCursor(new Vec2(0f, lineH));
@@ -763,11 +766,13 @@ public static class ImGui
     public static bool SliderFloat(string label, ref float value, float min, float max, Vec2? size = null, string? format = null, float? step = null)
     {
         var context = GetCurrentContext();
+        var style = context.Style;
+        var framePadding = style.FramePadding;
         var id = context.GetId(label);
         var renderLabel = GetRenderedLabel(label);
         var cursor = context.CursorPos;
         var lineH = context.GetLineHeight();
-        var sz = size ?? new Vec2(200f, MathF.Max(18f, lineH));
+        var sz = size ?? new Vec2(200f, MathF.Max(18f, lineH + framePadding.Y * 2f));
         var rect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + sz.X, cursor.Y + sz.Y);
         context.RegisterItem(id, rect);
 
@@ -848,12 +853,16 @@ public static class ImGui
         }
 
         // Draw track and knob
-        var trackCol = new ImGuiSharp.Math.Color(0.20f, 0.22f, 0.27f, 1f);
-        var fillCol = new ImGuiSharp.Math.Color(0.33f, 0.36f, 0.43f, 1f);
+        var trackCol = style.GetColor(ImGuiCol.FrameBg);
+        var knobBase = style.GetColor(ImGuiCol.Button);
+        var knobHovered = style.GetColor(ImGuiCol.ButtonHovered);
+        var knobActive = style.GetColor(ImGuiCol.ButtonActive);
+        var textColor = style.GetColor(ImGuiCol.Text);
         FillRect(new Vec2(rect.MinX, rect.MinY + (sz.Y - 8f) * 0.5f), new Vec2(sz.X, 8f), trackCol);
         var tknob = (value - min) / MathF.Max(0.0001f, (max - min));
         var knobX = rect.MinX + 6f + tknob * MathF.Max(1f, (sz.X - 12f));
-        FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), fillCol);
+        var knobCol = (context.ActiveId == id) ? knobActive : (hovered ? knobHovered : knobBase);
+        FillRect(new Vec2(knobX - 5f, rect.MinY + 2f), new Vec2(10f, sz.Y - 4f), knobCol);
 
         // Label & value text
         if (!string.IsNullOrEmpty(renderLabel))
@@ -862,7 +871,7 @@ public static class ImGui
             var text = string.Concat(renderLabel, ": ", valText);
             var baseline = new Vec2(rect.MinX, rect.MinY - context.GetAscent() + sz.Y + context.GetAscent());
             // draw below slider
-            context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, new ImGuiSharp.Math.Color(1f, 1f, 1f, 1f));
+            context.AddText(new Vec2(rect.MinX, rect.MaxY + context.GetAscent() * 0.1f), text, textColor);
         }
 
         context.AdvanceCursor(new Vec2(0f, sz.Y + 4f));
@@ -940,6 +949,16 @@ public static class ImGui
         }
 
         return 0;
+    }
+
+    private static Vec2 CalculateAlignedBaseline(Vec2 min, Vec2 max, float textWidth, float lineHeight, float ascent, Vec2 align)
+    {
+        var available = new Vec2(MathF.Max(0f, max.X - min.X), MathF.Max(0f, max.Y - min.Y));
+        float posX = min.X + (available.X - textWidth) * align.X;
+        posX = MathF.Max(posX, min.X);
+        float posY = min.Y + (available.Y - lineHeight) * align.Y;
+        posY = MathF.Max(posY, min.Y);
+        return new Vec2(posX, posY + ascent);
     }
 
     /// <summary>
