@@ -24,56 +24,56 @@ purely for comparison while we build feature parity.
 
 ### Feature Parity Snapshot
 
-Legend: ✔ implemented · ✗ not yet · ◑ partial/limited
+Legend: ✅ implemented · ❌ not yet · 🟡 partial/limited
 
 | Category | Feature | Dear ImGui | ImGuiSharp | Notes |
 |----------|---------|------------|------------|-------|
-| **Core Runtime** | Multiple contexts & switching | ✔ | ✔ | `ImGuiContext`, `ImGui.SetCurrentContext` |
-| | Frame lifecycle (`NewFrame/EndFrame`) | ✔ | ✔ | IO, delta time, frame timers |
-| | Draw data (`ImDrawData`) | ✔ | ✔ | Single aggregated draw list per frame |
-| | Multi-draw list support | ✔ | ◑ | One combined draw list today |
-| | ID stack & hashing | ✔ | ✔ | Window-seeded IDs, `PushID/PopID` |
-| | Item query API (`IsItemHovered/Active/...`) | ✔ | ✔ | Includes `IsItemDeactivatedAfterEdit` |
-| | Item snippets (`IsItemToggledOpen` etc.) | ✔ | ✗ | Pending |
-| **Input** | Mouse position/buttons/wheel | ✔ | ✔ | `SetMousePosition`, `SetMouseButtonState`, `AddMouseWheel` |
-| | Keyboard state & modifiers | ✔ | ✔ | `SetKeyState`, modifier detection |
-| | Input queue (`AddInputEvent`) | ✔ | ✔ | Basic event forwarding |
-| | Gamepad navigation | ✔ | ✗ | Not implemented |
-| **Text & Fonts** | Embedded font atlas | ✔ | ✔ | Proggy Clean via stb_truetype |
-| | External font loading | ✔ | ✗ | Future work |
-| | Kerning & width measurement | ✔ | ✔ | ASCII kerning, width cache |
-| | Text helpers (`Text`, `Label`, `TextWrapped`, `CalcTextSize`) | ✔ | ✔ | Wrap width via content region |
-| **Widgets** | Button / Checkbox / Radio | ✔ | ✔ | Style-driven visuals |
-| | SliderFloat | ✔ | ✔ | Mouse drag + keyboard modifiers/step |
-| | Separator / SeparatorText | ✔ | ✔ | Centered labels, style colours |
-| | ProgressBar | ✔ | ✗ | Planned |
-| | Combo/Selectables | ✔ | ✗ | Planned |
-| | InputText | ✔ | ✗ | Planned |
-| | Drag widgets (`DragFloat`, etc.) | ✔ | ✗ | Planned |
-| | Tree nodes / collapsing headers | ✔ | ✗ | Planned |
-| | Menus / MenuBar / Popup | ✔ | ✗ | Planned |
-| **Layout** | `SameLine`, `Spacing`, `NewLine` | ✔ | ✔ | Style spacing aware |
-| | Child windows (`BeginChild/EndChild`) | ✔ | ✔ | Scrollable regions + persistent scroll |
-| | Window containers (`Begin/End`) | ✔ | ✔ | Basic window stack (no title bars yet) |
-| | Columns, tables, layout helpers | ✔ | ✗ | Future milestone |
-| | Multi-viewport/platform windows | ✔ | ✗ | Not yet planned |
-| **Navigation & Focus** | Hover/focus state reporting | ✔ | ✔ | Item status flags |
-| | Keyboard navigation | ✔ | ✗ | Focus tracking only; nav TBD |
-| | Gamepad navigation | ✔ | ✗ | Not implemented |
-| **Style** | Colour palette editing | ✔ | ✔ | `ImGuiStyle.SetColor` for core slots |
-| | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✔ | ◑ | Padding/spacing/text align exposed; style stacks pending |
-| | Style stacks (`PushStyleVar/Color`) | ✔ | ✗ | Not implemented |
-| | Theme editing helpers (`ImGui::StyleColors*`) | ✔ | ✗ | To be added |
-| **Text/Item Queries** | Deactivated/AfterEdit / Active status | ✔ | ✔ | Per-item status flags |
-| | Storage queries (`GetItemRect`, etc.) | ✔ | ◑ | Rect via `LastItemRect`; more helpers pending |
-| **Rendering Backend** | Draw command submission | ✔ | ✔ | Silk.NET OpenGL reference backend |
-| | Texture registration | ✔ | ✔ | `RegisterTexture/UnregisterTexture` |
-| | Multi-backend abstraction | ✔ | ◑ | Interface defined; additional backends TBD |
-| | Software renderer | ✔ | ✗ | Not implemented |
-| **Advanced Features** | Docking | ✔ | ✗ | Future milestone |
-| | Tables API | ✔ | ✗ | Planned |
-| | Menus & popups | ✔ | ✗ | Planned |
-| | ImPlot/ImNodes integrations | ✔ | ✗ | Out of scope for now |
+| **Core Runtime** | Multiple contexts & switching | ✅ | ✅ | `ImGuiContext`, `ImGui.SetCurrentContext` |
+| | Frame lifecycle (`NewFrame/EndFrame`) | ✅ | ✅ | IO, delta time, frame timers |
+| | Draw data (`ImDrawData`) | ✅ | ✅ | Single aggregated draw list per frame |
+| | Multi-draw list support | ✅ | 🟡 | One combined draw list today |
+| | ID stack & hashing | ✅ | ✅ | Window-seeded IDs, `PushID/PopID` |
+| | Item query API (`IsItemHovered/Active/...`) | ✅ | ✅ | Includes `IsItemDeactivatedAfterEdit` |
+| | Item snippets (`IsItemToggledOpen` etc.) | ✅ | ❌ | Pending |
+| **Input** | Mouse position/buttons/wheel | ✅ | ✅ | `SetMousePosition`, `SetMouseButtonState`, `AddMouseWheel` |
+| | Keyboard state & modifiers | ✅ | ✅ | `SetKeyState`, modifier detection |
+| | Input queue (`AddInputEvent`) | ✅ | ✅ | Basic event forwarding |
+| | Gamepad navigation | ✅ | ❌ | Not implemented |
+| **Text & Fonts** | Embedded font atlas | ✅ | ✅ | Proggy Clean via stb_truetype |
+| | External font loading | ✅ | ❌ | Future work |
+| | Kerning & width measurement | ✅ | ✅ | ASCII kerning, width cache |
+| | Text helpers (`Text`, `Label`, `TextWrapped`, `CalcTextSize`) | ✅ | ✅ | Wrap width via content region |
+| **Widgets** | Button / Checkbox / Radio | ✅ | ✅ | Style-driven visuals |
+| | SliderFloat | ✅ | ✅ | Mouse drag + keyboard modifiers/step |
+| | Separator / SeparatorText | ✅ | ✅ | Centered labels, style colours |
+| | ProgressBar | ✅ | ❌ | Planned |
+| | Combo/Selectables | ✅ | ❌ | Planned |
+| | InputText | ✅ | ❌ | Planned |
+| | Drag widgets (`DragFloat`, etc.) | ✅ | ❌ | Planned |
+| | Tree nodes / collapsing headers | ✅ | ❌ | Planned |
+| | Menus / MenuBar / Popup | ✅ | ❌ | Planned |
+| **Layout** | `SameLine`, `Spacing`, `NewLine` | ✅ | ✅ | Style spacing aware |
+| | Child windows (`BeginChild/EndChild`) | ✅ | ✅ | Scrollable regions + persistent scroll |
+| | Window containers (`Begin/End`) | ✅ | ✅ | Basic window stack (no title bars yet) |
+| | Columns, tables, layout helpers | ✅ | ❌ | Future milestone |
+| | Multi-viewport/platform windows | ✅ | ❌ | Not yet planned |
+| **Navigation & Focus** | Hover/focus state reporting | ✅ | ✅ | Item status flags |
+| | Keyboard navigation | ✅ | ❌ | Focus tracking only; nav TBD |
+| | Gamepad navigation | ✅ | ❌ | Not implemented |
+| **Style** | Colour palette editing | ✅ | ✅ | `ImGuiStyle.SetColor` for core slots |
+| | Style variables (`FramePadding`, `ItemSpacing`, etc.) | ✅ | 🟡 | Padding/spacing/text align exposed; style stacks pending |
+| | Style stacks (`PushStyleVar/Color`) | ✅ | ❌ | Not implemented |
+| | Theme editing helpers (`ImGui::StyleColors*`) | ✅ | ❌ | To be added |
+| **Text/Item Queries** | Deactivated/AfterEdit / Active status | ✅ | ✅ | Per-item status flags |
+| | Storage queries (`GetItemRect`, etc.) | ✅ | 🟡 | Rect via `LastItemRect`; more helpers pending |
+| **Rendering Backend** | Draw command submission | ✅ | ✅ | Silk.NET OpenGL reference backend |
+| | Texture registration | ✅ | ✅ | `RegisterTexture/UnregisterTexture` |
+| | Multi-backend abstraction | ✅ | 🟡 | Interface defined; additional backends TBD |
+| | Software renderer | ✅ | ❌ | Not implemented |
+| **Advanced Features** | Docking | ✅ | ❌ | Future milestone |
+| | Tables API | ✅ | ❌ | Planned |
+| | Menus & popups | ✅ | ❌ | Planned |
+| | ImPlot/ImNodes integrations | ✅ | ❌ | Out of scope for now |
 
 
 See TODO.md and MILESTONE.md for roadmap and status.
