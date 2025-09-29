@@ -183,34 +183,8 @@ public static class ImGui
         var rect = new ImGuiRect(cursor.X, cursor.Y, rectMax.X, rectMax.Y);
         context.RegisterItem(id, rect);
 
-        var isHovered = context.IsMouseHoveringRect(cursor, rectMax);
-        if (isHovered)
-        {
-            context.SetHoveredId(id);
-            context.MarkItemHovered();
-        }
-
-        var pressed = false;
-        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && isHovered)
-        {
-            context.SetActiveId(id);
-            context.MarkItemPressed(ImGuiMouseButton.Left);
-        }
-
-        if (context.ActiveId == id)
-        {
-            context.MarkItemActive();
-            if (context.IsMouseJustReleased(ImGuiMouseButton.Left))
-            {
-                if (isHovered)
-                {
-                    pressed = true;
-                }
-
-                context.MarkItemReleased();
-                context.ClearActiveId();
-            }
-        }
+        var behavior = ButtonBehavior(context, rect, id);
+        var pressed = behavior.Pressed;
 
         var normal = style.GetColor(ImGuiCol.Button);
         var hovered = style.GetColor(ImGuiCol.ButtonHovered);
@@ -218,11 +192,11 @@ public static class ImGui
         bool hasFocus = context.FocusedId == id;
 
         Color drawColor;
-        if (context.ActiveId == id && context.IsMouseDown(ImGuiMouseButton.Left))
+        if (behavior.Held)
         {
             drawColor = active;
         }
-        else if (isHovered)
+        else if (behavior.Hovered)
         {
             drawColor = hovered;
         }
@@ -737,40 +711,27 @@ public static class ImGui
         var boxRect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, boxTop, cursor.X + boxSize, boxTop + boxSize);
         context.RegisterItem(id, totalRect);
 
-        bool hovered = context.IsMouseHoveringRect(new Vec2(totalRect.MinX, totalRect.MinY), new Vec2(totalRect.MaxX, totalRect.MaxY));
-        if (hovered)
-        {
-            context.SetHoveredId(id);
-            context.MarkItemHovered();
-        }
+        var behavior = ButtonBehavior(context, totalRect, id);
+        bool hovered = behavior.Hovered;
         bool hasFocus = context.FocusedId == id;
 
         bool changed = false;
-        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
-        {
-            context.SetActiveId(id);
-            context.MarkItemPressed(ImGuiMouseButton.Left);
-        }
 
         bool keyboardToggle = hasFocus && (context.IsKeyJustPressed(ImGuiKey.Space) || context.IsKeyJustPressed(ImGuiKey.Enter));
         if (keyboardToggle)
         {
             context.SetActiveId(id);
             context.MarkItemPressed(ImGuiMouseButton.Left);
+            value = !value;
+            changed = true;
+            context.MarkItemReleased();
+            context.ClearActiveId();
         }
-        if (context.ActiveId == id)
+
+        if (behavior.Pressed)
         {
-            context.MarkItemActive();
-            if (context.IsMouseJustReleased(ImGuiMouseButton.Left) || keyboardToggle)
-            {
-                if (hovered || keyboardToggle)
-                {
-                    value = !value;
-                    changed = true;
-                }
-                context.MarkItemReleased();
-                context.ClearActiveId();
-            }
+            value = !value;
+            changed = true;
         }
 
         // Draw box
@@ -817,20 +778,9 @@ public static class ImGui
         var rect = new ImGuiSharp.Rendering.ImGuiRect(cursor.X, cursor.Y, cursor.X + sz.X, cursor.Y + sz.Y);
         context.RegisterItem(id, rect);
 
-        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
-        if (hovered)
-        {
-            context.SetHoveredId(id);
-            context.MarkItemHovered();
-        }
+        var behavior = ButtonBehavior(context, rect, id);
+        bool hovered = behavior.Hovered;
         bool hasFocus = context.FocusedId == id;
-
-        // Begin drag
-        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
-        {
-            context.SetActiveId(id);
-            context.MarkItemPressed(ImGuiMouseButton.Left);
-        }
 
         bool changed = false;
         // While dragging, map mouse X to value
@@ -852,12 +802,7 @@ public static class ImGui
             }
         }
 
-        bool released = context.ActiveId == id && context.IsMouseJustReleased(ImGuiMouseButton.Left);
-        if (released)
-        {
-            context.MarkItemReleased();
-            context.ClearActiveId();
-        }
+        bool released = behavior.Released;
 
         // Keyboard control when active or hovered
         if (context.ActiveId == id || hovered || hasFocus)
@@ -966,53 +911,41 @@ public static class ImGui
         var circleRect = new ImGuiRect(cursor.X, circleTop, cursor.X + diameter, circleTop + diameter);
         context.RegisterItem(id, totalRect);
 
-        bool hovered = context.IsMouseHoveringRect(new Vec2(totalRect.MinX, totalRect.MinY), new Vec2(totalRect.MaxX, totalRect.MaxY));
-        if (hovered)
-        {
-            context.SetHoveredId(id);
-            context.MarkItemHovered();
-        }
+        var behavior = ButtonBehavior(context, totalRect, id);
 
         bool hasFocus = context.FocusedId == id;
 
         bool changed = false;
         bool selected = value == option;
         bool keyboardActivate = hasFocus && (context.IsKeyJustPressed(ImGuiKey.Space) || context.IsKeyJustPressed(ImGuiKey.Enter));
-        if (context.IsMouseJustPressed(ImGuiMouseButton.Left) && hovered)
-        {
-            context.SetActiveId(id);
-            context.MarkItemPressed(ImGuiMouseButton.Left);
-        }
         if (keyboardActivate)
         {
             context.SetActiveId(id);
             context.MarkItemPressed(ImGuiMouseButton.Left);
-        }
-        if (context.ActiveId == id)
-        {
-            context.MarkItemActive();
-            bool mouseReleased = context.IsMouseJustReleased(ImGuiMouseButton.Left);
-            bool shouldCommit = (mouseReleased && hovered) || keyboardActivate;
-            if (shouldCommit && !selected)
+            if (!selected)
             {
                 value = option;
                 selected = true;
                 changed = true;
                 context.MarkItemEdited();
             }
+            context.MarkItemReleased();
+            context.ClearActiveId();
+        }
 
-            if (mouseReleased || keyboardActivate)
-            {
-                context.MarkItemReleased();
-                context.ClearActiveId();
-            }
+        if (behavior.Pressed && !selected)
+        {
+            value = option;
+            selected = true;
+            changed = true;
+            context.MarkItemEdited();
         }
 
         var baseCol = style.GetColor(ImGuiCol.FrameBg);
         var hoverCol = style.GetColor(ImGuiCol.FrameBgHovered);
         var activeCol = style.GetColor(ImGuiCol.FrameBgActive);
         var markCol = style.GetColor(ImGuiCol.CheckMark);
-        var drawColor = context.ActiveId == id ? activeCol : ((hovered || hasFocus) ? hoverCol : baseCol);
+        var drawColor = context.ActiveId == id ? activeCol : ((behavior.Hovered || hasFocus) ? hoverCol : baseCol);
         var center = new Vec2(circleRect.MinX + radius, circleRect.MinY + radius);
         context.AddCircleFilled(center, radius, drawColor, 16);
         if (selected)
@@ -1104,6 +1037,69 @@ public static class ImGui
         }
 
         return 0;
+    }
+
+    private readonly struct ButtonBehaviorResult
+    {
+        public ButtonBehaviorResult(bool hovered, bool held, bool pressed, bool released, bool activated)
+        {
+            Hovered = hovered;
+            Held = held;
+            Pressed = pressed;
+            Released = released;
+            Activated = activated;
+        }
+
+        public bool Hovered { get; }
+        public bool Held { get; }
+        public bool Pressed { get; }
+        public bool Released { get; }
+        public bool Activated { get; }
+    }
+
+    private static ButtonBehaviorResult ButtonBehavior(ImGuiContext context, in ImGuiRect rect, uint id)
+    {
+        var min = new Vec2(rect.MinX, rect.MinY);
+        var max = new Vec2(rect.MaxX, rect.MaxY);
+
+        bool hovered = context.IsMouseHoveringRect(min, max);
+        if (hovered && id != 0)
+        {
+            context.SetHoveredId(id);
+            context.MarkItemHovered();
+        }
+
+        bool activated = false;
+        bool pressed = false;
+        bool released = false;
+
+        if (hovered && context.IsMouseJustPressed(ImGuiMouseButton.Left))
+        {
+            context.SetActiveId(id);
+            context.MarkItemPressed(ImGuiMouseButton.Left);
+            activated = true;
+        }
+
+        bool held = false;
+        if (context.ActiveId == id)
+        {
+            held = context.IsMouseDown(ImGuiMouseButton.Left);
+            context.MarkItemActive();
+
+            if (!held)
+            {
+                released = true;
+                if (hovered)
+                {
+                    pressed = true;
+                }
+
+                context.MarkItemReleased();
+                context.ClearActiveId();
+            }
+        }
+
+        return new ButtonBehaviorResult(hovered, held, pressed, released, activated);
     }
 
     private static void RenderNavHighlight(ImGuiContext context, in ImGuiRect rect, uint id)

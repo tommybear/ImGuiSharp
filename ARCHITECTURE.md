@@ -124,6 +124,10 @@ concepts of Dear ImGui to ImGuiSharp components and how the renderer backend
   - Visuals: circular frame from `FrameBg` colours with inner dot using
     `CheckMark` colour when selected; nav focus highlights the whole row.
 
+- Shared widget interaction uses an internal `ButtonBehavior` helper mirroring
+  Dear ImGui, so Button/Checkbox/Radio/Slider all share the same hover/press
+  handling for pointer input, reducing drift.
+
 - SliderFloat
   - Press within the track activates; horizontal mouse drag maps pixels→value
     with clamping to `[min,max]` and returns `true` on release.
