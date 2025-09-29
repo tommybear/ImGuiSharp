@@ -22,6 +22,42 @@ purely for comparison while we build feature parity.
 - Renderer (Silk.NET OpenGL): VAO/VBO/EBO, blending, scissor, per‑command
   texture binding + default 1×1 white fallback, scissor‑aware clear fix
 
+### Feature Parity Snapshot
+
+| Category | Feature | Dear ImGui | ImGuiSharp | Notes |
+|----------|---------|------------|------------|-------|
+| Core | Context creation & switching | ✔ | ✔ | `ImGuiContext`, `ImGui.SetCurrentContext` |
+| Core | Frame lifecycle (`NewFrame/EndFrame`) | ✔ | ✔ | Matches IO/timing semantics |
+| Core | Draw data (`ImDrawData`) | ✔ | ✔ | Single aggregated draw list |
+| Core | ID stack & hashing | ✔ | ✔ | Window-seeded IDs, `PushID/PopID` |
+| Core | Item query API (`IsItemHovered/Active/...`) | ✔ | ✔ | Includes `IsItemDeactivatedAfterEdit` |
+| Input | Mouse position/buttons/wheel | ✔ | ✔ | Via `ImGui.SetMousePosition/SetMouseButtonState/AddMouseWheel` |
+| Input | Keyboard state (keys, modifier detection) | ✔ | ✔ | `ImGui.SetKeyState`, modifier queries |
+| Text & Fonts | Font atlas baking | ✔ | ✔ | Embedded Proggy Clean via stb_truetype |
+| Text & Fonts | Text rendering (`Text`, `Label`, `TextWrapped`) | ✔ | ✔ | Wrapping, kerning, width cache |
+| Widgets | Button | ✔ | ✔ | Style colours, keyboard activation |
+| Widgets | Checkbox | ✔ | ✔ | Style colours, boolean toggle |
+| Widgets | RadioButton | ✔ | ✔ | Circular frame + check mark |
+| Widgets | SliderFloat | ✔ | ✔ | Mouse drag + keyboard modifiers/step |
+| Widgets | Separator / SeparatorText | ✔ | ✔ | Style colours, centered text |
+| Widgets | Text inputs (`InputText`) | ✔ | ✖ | Planned |
+| Widgets | Drag widgets (`DragFloat`, etc.) | ✔ | ✖ | Planned |
+| Layout | `SameLine`, `Spacing`, `NewLine` | ✔ | ✔ | Style spacing aware |
+| Layout | Child windows (`BeginChild/EndChild`) | ✔ | ✔ | Scrollable regions + clamping |
+| Layout | Window stack (`Begin/End`) | ✔ | ✔ | Basic window container (no title bars yet) |
+| Layout | Columns/Table API | ✔ | ✖ | Not implemented |
+| Navigation | Keyboard/gamepad navigation & focus | ✔ | ✖ | Focus tracking only; nav TBD |
+| Navigation | Item activation via keyboard | ✔ | Partial | Buttons/slider support; full nav pending |
+| Style | Colour palette | ✔ | ✔ | `ImGuiStyle.SetColor` covering core slots |
+| Style | Style variables (padding, spacing, rounding) | ✔ | Partial | Item spacing/padding/text align only |
+| Style | Fonts configurable | ✔ | Partial | Single embedded font; external fonts TBD |
+| Advanced | Docking | ✔ | ✖ | Future milestone |
+| Advanced | Tables/headers/menus | ✔ | ✖ | Future milestone |
+| Advanced | Multi-viewport | ✔ | ✖ | Not planned yet |
+| Backend | Rendering abstraction | ✔ | ✔ | Silk.NET OpenGL implementation |
+| Backend | Multi-backend support | ✔ | Partial | Only OpenGL provider today |
+
+
 See TODO.md and MILESTONE.md for roadmap and status.
 For architecture details and contributor guidance (including how to add a new widget), see ARCHITECTURE.md.
 
