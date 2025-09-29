@@ -916,11 +916,19 @@ public static class ImGui
         var rect = new ImGuiRect(cursor.X, cursor.Y, cursor.X + frameSize.X, cursor.Y + frameSize.Y);
         context.RegisterItem(id, rect);
 
-        var behavior = ButtonBehavior(context, rect, id);
         var state = context.InputTextState;
         bool selectAll = (flags & ImGuiInputTextFlags.AutoSelectAll) != 0;
+        bool hovered = context.IsMouseHoveringRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX, rect.MaxY));
+        if (hovered && id != 0)
+        {
+            context.SetHoveredId(id);
+            context.MarkItemHovered();
+        }
 
-        if (behavior.Activated)
+        bool clicked = hovered && context.IsMouseJustPressed(ImGuiMouseButton.Left);
+        bool focusRequested = context.FocusedId == id && (!state.IsActive || state.Id != id);
+
+        if ((clicked || focusRequested) && state.Id != id)
         {
             state.Activate(id, text, selectAll);
             if (state.Text.Length > actualMaxLength)
@@ -933,14 +941,9 @@ public static class ImGui
             context.SetFocusId(id);
         }
 
-        if (!state.IsActive && context.ActiveId == id)
-        {
-            state.Activate(id, text, selectAll);
-        }
-
         bool valueChanged = false;
         bool submit = false;
-        if (state.Id == id)
+        if (state.Id == id && (context.ActiveId == id || context.ActiveId == 0))
         {
             context.SetActiveId(id);
             context.MarkItemActive();
@@ -958,22 +961,13 @@ public static class ImGui
                 state.Deactivate();
                 context.ClearActiveId();
                 context.MarkItemReleased();
-                switch (deactivateReason)
+                if (deactivateReason == InputTextDeactivateReason.Submit || deactivateReason == InputTextDeactivateReason.Escape || deactivateReason == InputTextDeactivateReason.Tab)
                 {
-                    case InputTextDeactivateReason.Submit:
-                        context.SetFocusId(0);
-                        break;
-                    case InputTextDeactivateReason.Escape:
-                    case InputTextDeactivateReason.Tab:
-                        context.SetFocusId(0);
-                        break;
-                    default:
-                        context.SetFocusId(id);
-                        break;
+                    context.SetFocusId(0);
                 }
             }
         }
-        else if (state.IsActive && state.Id == id)
+        else if (state.IsActive && state.Id == id && context.ActiveId != id)
         {
             state.Deactivate();
         }
@@ -1003,7 +997,7 @@ public static class ImGui
         var baseColor = style.GetColor(ImGuiCol.FrameBg);
         var hoverColor = style.GetColor(ImGuiCol.FrameBgHovered);
         var activeColor = style.GetColor(ImGuiCol.FrameBgActive);
-        var frameColor = context.ActiveId == id ? activeColor : (behavior.Hovered ? hoverColor : baseColor);
+        var frameColor = context.ActiveId == id ? activeColor : (hovered ? hoverColor : baseColor);
         FillRect(new Vec2(rect.MinX, rect.MinY), new Vec2(rect.MaxX - rect.MinX, rect.MaxY - rect.MinY), frameColor);
 
         float textStartX = textBaseX - (isActive ? state.ScrollX : 0f);
@@ -1050,6 +1044,8 @@ public static class ImGui
 
         RenderNavHighlight(context, rect, id);
         RenderFrameBorder(context, rect);
+
+        context.UpdateItemStatusFlags(hovered, context.ActiveId == id, false, false, context.FocusedId == id);
 
         context.AdvanceCursor(new Vec2(0f, frameSize.Y));
 
